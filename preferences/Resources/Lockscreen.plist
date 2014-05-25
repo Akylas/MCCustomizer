@@ -1,169 +1,113 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
-    <key>items</key>
-    <array>
+    <dict>
+        <key>items</key>           <array>
 
         <dict>
-            <key>cell</key>                 <string>PSGroupCell</string>
-            <key>label</key>                <string>Artwork Background</string>
+            <key>cell</key>            <string>PSGroupCell</string>
+            <key>label</key>           <string>Artwork Background</string>
         </dict>
         <dict>
-            <key>cell</key>
-            <string>PSSwitchCell</string>
-            <key>default</key>
-            <true/>
-            <key>defaults</key>
-            <string>com.akylas.mccustomizer</string>
-            <key>label</key>
-            <string>Enabled</string>
-            <key>key</key>
-            <string>lsArtworkEnabled</string>
-            <key>PostNotification</key>
-            <string>com.akylas.mccustomizer.preferences-changed</string>
+            <key>cell</key>            <string>PSSwitchCell</string>
+            <key>default</key>         <true/>
+            <key>defaults</key>        <string>com.akylas.mccustomizer</string>
+            <key>label</key>           <string>Enabled</string>
+            <key>key</key>             <string>lsArtworkEnabled</string>
+            <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
         </dict>
         <dict>
-            <key>cell</key>
-            <string>PSSwitchCell</string>
-            <key>default</key>
-            <false/>
-            <key>defaults</key>
-            <string>com.akylas.mccustomizer</string>
-            <key>label</key>
-            <string>Scale to fit</string>
-            <key>key</key>
-            <string>lsArtworkScaleToFit</string>
-            <key>PostNotification</key>
-            <string>com.akylas.mccustomizer.preferences-changed</string>
+            <key>cell</key>            <string>PSSwitchCell</string>
+            <key>default</key>         <false/>
+            <key>defaults</key>        <string>com.akylas.mccustomizer</string>
+            <key>label</key>           <string>Scale to fit</string>
+            <key>key</key>             <string>lsArtworkScaleToFit</string>
+            <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
         </dict>
 
         <dict>
-            <key>cell</key>                 <string>PSGroupCell</string>
-            <key>label</key>                <string>Artwork opacity</string>
+            <key>cell</key>            <string>PSGroupCell</string>
+            <key>label</key>           <string>Artwork opacity</string>
         </dict>
         <dict>
-            <key>showValue</key>
-            <true/>
-            <key>max</key>
-            <integer>1</integer>
-            <key>min</key>
-            <real>0.01</real>
+            <key>showValue</key>       <true/>
+            <key>max</key>             <integer>1</integer>
+            <key>min</key>             <real>0.01</real>
             
-            <key>cell</key>
-            <string>PSSliderCell</string>
-            <key>default</key>
-            <real>1.0</real>
-            <key>defaults</key>
-            <string>com.akylas.mccustomizer</string>
-            <key>key</key>
-            <string>lsArtworkOpacity</string>
-            <key>PostNotification</key>
-            <string>com.akylas.mccustomizer.preferences-changed</string>
+            <key>cell</key>            <string>PSSliderCell</string>
+            <key>default</key>         <real>1.0</real>
+            <key>defaults</key>        <string>com.akylas.mccustomizer</string>
+            <key>key</key>             <string>lsArtworkOpacity</string>
+            <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
         </dict>
 
         <dict>
-            <key>cell</key>                 <string>PSGroupCell</string>
-            <key>label</key>                <string>Music Widget Default text</string>
+            <key>cell</key>            <string>PSGroupCell</string>
+            <key>label</key>           <string>Music Widget Default text</string>
         </dict>
         <dict>
-            <key>cell</key>
-            <string>PSEditTextCell</string>
-            <key>default</key>
-            <string>No Music playing</string>
-            <key>defaults</key>
-            <string>com.akylas.mccustomizer</string>
-            <key>key</key>
-            <string>lsNoPlayingText</string>
-            <key>PostNotification</key>
-            <string>com.akylas.mccustomizer.preferences-changed</string>
+            <key>cell</key>            <string>PSEditTextCell</string>
+            <key>default</key>         <string>No Music playing</string>
+            <key>defaults</key>        <string>com.akylas.mccustomizer</string>
+            <key>key</key>             <string>lsNoPlayingText</string>
+            <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
         </dict>
 
         <dict>
-            <key>cell</key>                 <string>PSGroupCell</string>
-            <key>label</key>                <string>Music Widget Sections</string>
+            <key>cell</key>            <string>PSGroupCell</string>
+            <key>label</key>           <string>Music Widget Sections</string>
         </dict>
         <dict>
-            <key>cell</key>
-            <string>PSSwitchCell</string>
-            <key>default</key>
-            <true/>
-            <key>defaults</key>
-            <string>com.akylas.mccustomizer</string>
-            <key>label</key>
-            <string>Progressbar</string>
-            <key>key</key>
-            <string>lsShowTime</string>
-            <key>PostNotification</key>
-            <string>com.akylas.mccustomizer.preferences-changed</string>
+            <key>cell</key>            <string>PSSwitchCell</string>
+            <key>default</key>         <true/>
+            <key>defaults</key>        <string>com.akylas.mccustomizer</string>
+            <key>label</key>           <string>Progressbar</string>
+            <key>key</key>             <string>lsShowTime</string>
+            <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
         </dict>
 
         <dict>
-            <key>cell</key>
-            <string>PSSwitchCell</string>
-            <key>default</key>
-            <true/>
-            <key>defaults</key>
-            <string>com.akylas.mccustomizer</string>
-            <key>label</key>
-            <string>Track Informations</string>
-            <key>key</key>
-            <string>lsShowInfo</string>
-            <key>PostNotification</key>
-            <string>com.akylas.mccustomizer.preferences-changed</string>
+            <key>cell</key>            <string>PSSwitchCell</string>
+            <key>default</key>         <true/>
+            <key>defaults</key>        <string>com.akylas.mccustomizer</string>
+            <key>label</key>           <string>Track Informations</string>
+            <key>key</key>             <string>lsShowInfo</string>
+            <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
         </dict>
 
         <dict>
-            <key>cell</key>
-            <string>PSSwitchCell</string>
-            <key>default</key>
-            <true/>
-            <key>defaults</key>
-            <string>com.akylas.mccustomizer</string>
-            <key>label</key>
-            <string>Playback Controls</string>
-            <key>key</key>
-            <string>lsShowButtons</string>
-            <key>PostNotification</key>
-            <string>com.akylas.mccustomizer.preferences-changed</string>
+            <key>cell</key>            <string>PSSwitchCell</string>
+            <key>default</key>         <true/>
+            <key>defaults</key>        <string>com.akylas.mccustomizer</string>
+            <key>label</key>           <string>Playback Controls</string>
+            <key>key</key>             <string>lsShowButtons</string>
+            <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
         </dict>
 
         <dict>
-            <key>cell</key>
-            <string>PSSwitchCell</string>
-            <key>default</key>
-            <true/>
-            <key>defaults</key>
-            <string>com.akylas.mccustomizer</string>
-            <key>label</key>
-            <string>Volume Control</string>
-            <key>key</key>
-            <string>lsShowVolume</string>
-            <key>PostNotification</key>
-            <string>com.akylas.mccustomizer.preferences-changed</string>
+            <key>cell</key>            <string>PSSwitchCell</string>
+            <key>default</key>         <true/>
+            <key>defaults</key>        <string>com.akylas.mccustomizer</string>
+            <key>label</key>           <string>Volume Control</string>
+            <key>key</key>             <string>lsShowVolume</string>
+            <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
         </dict>
 
         <dict>
-            <key>cell</key>                 <string>PSGroupCell</string>
-            <key>label</key>                <string>Gestures</string>
+            <key>cell</key>            <string>PSGroupCell</string>
+            <key>label</key>           <string>Gestures</string>
         </dict>
         <dict>
-            <key>cell</key>
-            <string>PSSwitchCell</string>
-            <key>default</key>
-            <true/>
-            <key>defaults</key>
-            <string>com.akylas.mccustomizer</string>
-            <key>label</key>
-            <string>Enabled</string>
-            <key>key</key>
-            <string>lsGesturesEnabled</string>
-            <key>PostNotification</key>
-            <string>com.akylas.mccustomizer.preferences-changed</string>
+            <key>cell</key>            <string>PSSwitchCell</string>
+            <key>default</key>         <true/>
+            <key>defaults</key>        <string>com.akylas.mccustomizer</string>
+            <key>label</key>           <string>Enabled</string>
+            <key>key</key>             <string>lsGesturesEnabled</string>
+            <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
         </dict>
 
     </array>
-    <key>title</key>                <string>Lockscreen</string>
+    <key>title</key>           <string>Lockscreen</string>
 
 </dict>
 </plist>
