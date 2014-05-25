@@ -1,0 +1,8 @@
+Package: com.akylas.ccblurmusic
+Name: CCBlurMusic
+Depends: de.j-gessner.ccloader, firmware (>= 7.0)
+Version: 0.0.1
+Architecture: iphoneos-arm
+Description: An awesome Control Center plugin!
+Author: Martin Guillon
+Section: Addons (ControlCenter)

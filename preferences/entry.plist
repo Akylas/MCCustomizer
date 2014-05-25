@@ -1,0 +1,10 @@
+{
+    entry = {
+	bundle = MCCustomizer;
+	cell = PSLinkCell;
+	detail = MCCustomizerListController;
+	icon = MCCustomizer.png;
+	isController = 1;
+	label = MCCustomizer;
+    };
+}

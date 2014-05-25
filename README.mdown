@@ -1,0 +1,20 @@
+Spectral
+=============
+
+Give youo control over the iOS7 music controller
+
+<!-- ![Spectral Preview](https://github.com/b3ll/Spectral/raw/master/preview/SpectralPreview.png "Spectral Preview")   -->
+
+## How do I compile?
+I used Theos for this. You'll need to install them and setup the appropriate environment variables etc as well as configuring. Info on that [here](http://iphonedevwiki.net/index.php/Theos/Getting_Started).
+
+ARM64 support is enabled by default and if you need help setting that up check [here](http://iphonedevwiki.net/index.php/Updating_extensions_for_iOS_7).
+
+If you edit the Makefile you can specify your iOS device's ip and such to build and run using `make package install`. Otherwise you can simply `make package` to generate a .deb file and install that by any means.
+
+
+## License?
+Pretty much the BSD license, just don't repackage it and call it your own please!
+
+Also if you do make some changes, feel free to make a pull request and help make things more awesome!
+
