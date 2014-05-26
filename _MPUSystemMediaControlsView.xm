@@ -56,6 +56,7 @@ float getMediaControlsHeight(BOOL isLS)
 @interface _MPUSystemMediaControlsView()
 -(BOOL)gesturesEnabled ;
 -(void)afterLayoutSubviews;
+-(float)getMediaControlsHeight;
 @end
 
 @implementation _MPUSystemMediaControlsView (Additions)
@@ -129,6 +130,18 @@ float getMediaControlsHeight(BOOL isLS)
     self.volumeView.frame = frame;
 }
 
+%new
+-(float)getMediaControlsHeight
+{
+    return getMediaControlsHeight([self isCCSection]);
+}
+
+// - (void)setFrame:(CGRect)frame {
+//     frame.size.height =  [self getMediaControlsHeight];
+//     %orig(frame);
+//     Log(@"setFrame %@", NSStringFromCGRect(frame));
+// }
+
 - (void)layoutSubviews {
     %orig;
     [self afterLayoutSubviews];
@@ -150,20 +163,9 @@ float getMediaControlsHeight(BOOL isLS)
     [swipeReco setDirection:(UISwipeGestureRecognizerDirectionRight)];
     [view addGestureRecognizer:swipeReco];
 
-    UITapGestureRecognizer* singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTap:)];
-    singleTap.cancelsTouchesInView = NO;
-    singleTap.delaysTouchesBegan = YES;
-    singleTap.delaysTouchesEnded = YES;
-    [singleTap setNumberOfTapsRequired:1];
-
     UILongPressGestureRecognizer *longPressReco = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPressGesture:)];
+    longPressReco.delegate = (id<UILongPressGestureRecognizerDelegate>)self;
     [view addGestureRecognizer:longPressReco];
-    [singleTap requireGestureRecognizerToFail:longPressReco];
-
-    MPUNowPlayingTitlesView* trackInformationView = ((MPUNowPlayingTitlesView*)self.trackInformationView);
-    
-    trackInformationView.userInteractionEnabled = YES;
-    [trackInformationView addGestureRecognizer:singleTap];
 
     
     return view;
@@ -182,17 +184,6 @@ float getMediaControlsHeight(BOOL isLS)
 - (void) handleDoubleTap:(UIGestureRecognizer*) sender
 {
     if (![self gesturesEnabled]) return;
-}
-
-%new
-- (void) handleSingleTap:(UIGestureRecognizer*) sender
-{
-    if (!SHOULD_HOOK()) return;
-    BOOL isCCControl = [self isCCSection];
-    if ((isCCControl && !BOOL_PROP(ccShowButtons) ) || (!isCCControl && !BOOL_PROP(lsShowButtons))) {
-        // Log(@"handleSingleTap");
-        [[%c(SBMediaController) sharedInstance] togglePlayPause];
-    }
 }
 
 %new
@@ -221,7 +212,6 @@ float getMediaControlsHeight(BOOL isLS)
         }
         else {
             NSString* defaultApp = STRING_PROP(DefaultApp);
-            Log(@"handleLongPressGesture %@", defaultApp);
             [[%c(SBUIController) sharedInstance] activateApplicationAnimated:[[%c(SBApplicationController) sharedInstance] applicationWithDisplayIdentifier:defaultApp]];
         }
     }
