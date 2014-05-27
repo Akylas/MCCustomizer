@@ -23,6 +23,9 @@
         }
         else if ((isCCControl && !BOOL_PROP(ccShowButtons) ) || (!isCCControl && !BOOL_PROP(lsShowButtons))) {
             [[%c(SBMediaController) sharedInstance] togglePlayPause];
+            if (isCCControl && BOOL_PROP(ccHideOnPlayPause)) {
+                [[%c(SBControlCenterController) sharedInstanceIfExists] dismissAnimated:YES];
+            }
         }
     }
     else {

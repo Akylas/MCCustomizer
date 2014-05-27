@@ -292,6 +292,7 @@
 + (id)sharedInstanceIfExists;
 + (id)sharedInstance;
 - (SBControlCenterViewController*)viewController;
+-(void)dismissAnimated:(BOOL)arg1 ;
 @end
 
 @interface SBMediaController : NSObject
