@@ -55,6 +55,11 @@ float getMediaControlsHeight(BOOL isLS)
     return height;
 }
 
+// static CGRect originalTrackInformationViewFrame;
+// static CGRect originalTransportControlsViewFrame;
+// static CGRect originalTimeInformationViewFrame;
+// static CGRect originalVolumeViewFrame;
+static BOOL firstLayout = TRUE;
 
 @interface _MPUSystemMediaControlsView()
 -(BOOL)gesturesEnabled ;
@@ -80,18 +85,38 @@ float getMediaControlsHeight(BOOL isLS)
 %new
 -(void)afterLayoutSubviews
 {
-    if (!SHOULD_HOOK()) return;
+    if (!SHOULD_HOOK()) {
+        if (!firstLayout) {
+            Log(@"resetting layout");
+            [self.volumeView setHidden:NO];
+            [self.timeInformationView setHidden:NO];
+            [self.trackInformationView setHidden:NO];
+            [self.transportControlsView setHidden:NO];
+            // self.trackInformationView.frame = originalTrackInformationViewFrame;
+            // self.transportControlsView.frame = originalTransportControlsViewFrame;
+            // self.timeInformationView.frame = originalTimeInformationViewFrame;
+            // self.volumeView.frame = originalVolumeViewFrame;
+            firstLayout = YES;
+        }
+        return;
+    }
+    if (firstLayout) {
+        Log(@"saving layout");
+        // originalTrackInformationViewFrame = self.trackInformationView.frame;
+        // originalTransportControlsViewFrame = self.transportControlsView.frame;
+        // originalTimeInformationViewFrame = self.timeInformationView.frame;
+        // originalVolumeViewFrame = self.volumeView.frame;
+        firstLayout = NO;
+    }
     BOOL hideVolume, hideInfo, hideTime, hideButtons;
     BOOL isCCControl = [self isCCSection];
     MPUNowPlayingTitlesView* trackInformationView = ((MPUNowPlayingTitlesView*)self.trackInformationView);
 
     if (trackInformationView.titleText == nil) {
         [trackInformationView setTitleText:isCCControl?STRING_PROP(ccNoPlayingText):STRING_PROP(lsNoPlayingText)];
-        if ((isCCControl && BOOL_PROP(ccOneTapToOpenNoMusic) ) || (!isCCControl && BOOL_PROP(lsOneTapToOpenNoMusic))) {
-            NSString* defaultApp = STRING_PROP(DefaultApp);
-            SBApplication* app = [[%c(SBApplicationController) sharedInstance] applicationWithDisplayIdentifier:defaultApp];        
-            [trackInformationView setArtistText:[NSString stringWithFormat:@"Tap to open %@", [app displayName]]];
-        }
+        BOOL oneTapToOpen = (isCCControl && BOOL_PROP(ccOneTapToOpenNoMusic)) || (!isCCControl && BOOL_PROP(lsOneTapToOpenNoMusic));
+        SBApplication* app = [[%c(SBApplicationController) sharedInstance] applicationWithDisplayIdentifier:STRING_PROP(DefaultApp)];  
+        [trackInformationView setArtistText:[NSString stringWithFormat:oneTapToOpen?@"Tap to open %@":@"Long press to open %@", [app displayName]]];
     }
 
     
@@ -113,29 +138,32 @@ float getMediaControlsHeight(BOOL isLS)
     [self.transportControlsView setHidden:hideButtons];
 
     CGFloat top = timeInformationViewTop;
+    CGRect frame;
     if (!hideTime) {
         top += (trackInformationViewTop - timeInformationViewTop);
     }
-    CGRect frame = self.trackInformationView.frame;
-    frame.origin.y = top;
-    frame.size.height = trackInformationViewHeight;
-    self.trackInformationView.frame = frame;
 
     if (!hideInfo) {
+        frame = self.trackInformationView.frame;
+        frame.origin.y = top;
+        frame.size.height = trackInformationViewHeight;
+        self.trackInformationView.frame = frame;
         top += (transportControlsViewTop - trackInformationViewTop);
     }
-    frame = self.transportControlsView.frame;
-    frame.origin.y = top;
-    frame.size.height = transportControlsViewHeight;
-    self.transportControlsView.frame = frame;
 
     if (!hideButtons) {
+        frame = self.transportControlsView.frame;
+        frame.origin.y = top;
+        frame.size.height = transportControlsViewHeight;
+        self.transportControlsView.frame = frame;
         top += (volumeViewTop - transportControlsViewTop);
     }
-    frame = self.volumeView.frame;
-    frame.origin.y = top;
-    frame.size.height = volumeViewHeight;
-    self.volumeView.frame = frame;
+    if (!hideVolume) {
+        frame = self.volumeView.frame;
+        frame.origin.y = top;
+        frame.size.height = volumeViewHeight;
+        self.volumeView.frame = frame;
+    }
 }
 
 %new
