@@ -123,6 +123,7 @@
 
 -(id)bundleIdentifier;
 -(id)displayIdentifier;
+- (id)displayName;
 @end
 
 

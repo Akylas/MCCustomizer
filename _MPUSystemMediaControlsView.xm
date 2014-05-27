@@ -49,6 +49,9 @@ float getMediaControlsHeight(BOOL isLS)
     if (!hideVolume) {
         height = MAX(height, top + volumeViewHeight);
     }
+    else {
+        height += 10;
+    }
     return height;
 }
 
@@ -84,6 +87,11 @@ float getMediaControlsHeight(BOOL isLS)
 
     if (trackInformationView.titleText == nil) {
         [trackInformationView setTitleText:isCCControl?STRING_PROP(ccNoPlayingText):STRING_PROP(lsNoPlayingText)];
+        if ((isCCControl && BOOL_PROP(ccOneTapToOpenNoMusic) ) || (!isCCControl && BOOL_PROP(lsOneTapToOpenNoMusic))) {
+            NSString* defaultApp = STRING_PROP(DefaultApp);
+            SBApplication* app = [[%c(SBApplicationController) sharedInstance] applicationWithDisplayIdentifier:defaultApp];        
+            [trackInformationView setArtistText:[NSString stringWithFormat:@"Tap to open %@", [app displayName]]];
+        }
     }
 
     

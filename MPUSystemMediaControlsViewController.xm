@@ -15,13 +15,20 @@
 
 -(void)mediaControlsTitlesViewWasTapped:(id)arg1 
 {
-    if (![[self mediaControlsView] gesturesEnabled]) {
-        %orig;
+    BOOL hasData = [[%c(SBMediaController) sharedInstance] nowPlayingApplication] != nil;
+    BOOL isCCControl = [[self mediaControlsView] isCCSection];
+    if (hasData) {
+        if (![[self mediaControlsView] gesturesEnabled]) {
+            %orig;
+        }
+        else if ((isCCControl && !BOOL_PROP(ccShowButtons) ) || (!isCCControl && !BOOL_PROP(lsShowButtons))) {
+            [[%c(SBMediaController) sharedInstance] togglePlayPause];
+        }
     }
     else {
-        BOOL isCCControl = [[self mediaControlsView] isCCSection];
-        if ((isCCControl && !BOOL_PROP(ccShowButtons) ) || (!isCCControl && !BOOL_PROP(lsShowButtons))) {
-            [[%c(SBMediaController) sharedInstance] togglePlayPause];
+        if ((isCCControl && BOOL_PROP(ccOneTapToOpenNoMusic) ) || (!isCCControl && BOOL_PROP(lsOneTapToOpenNoMusic))) {
+            NSString* defaultApp = STRING_PROP(DefaultApp);
+            [[%c(SBUIController) sharedInstance] activateApplicationAnimated:[[%c(SBApplicationController) sharedInstance] applicationWithDisplayIdentifier:defaultApp]];
         }
     }
 }

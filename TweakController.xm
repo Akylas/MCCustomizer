@@ -82,6 +82,8 @@
             @"lsArtworkOpacity":@(1.0),
             @"ccArtworkScaleToFit":@(NO),
             @"lsArtworkScaleToFit":@(NO),
+            @"ccOneTapToOpenNoMusic":@(YES),
+            @"lsOneTapToOpenNoMusic":@(YES),
             @"DefaultApp":@"com.apple.Music"
         }];
         _didLoadSettings = NO;
