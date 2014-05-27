@@ -1,8 +1,8 @@
 Package: com.akylas.ccblurmusic
-Name: CCBlurMusic
+Name: Music Controls Customizer
 Depends: de.j-gessner.ccloader, firmware (>= 7.0)
 Version: 0.0.1
 Architecture: iphoneos-arm
-Description: An awesome Control Center plugin!
+Description: Your Ultimate music controls customizer!
 Author: Martin Guillon
 Section: Addons (ControlCenter)
