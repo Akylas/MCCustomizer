@@ -12,40 +12,40 @@
 
 %hook SBControlCenterViewController
 %new
--(id)containerView
+-(SBControlCenterContainerView*)containerView
 {
-    return MSHookIvar<UIView*>(self, "_containerView");
+    return MSHookIvar<SBControlCenterContainerView*>(self, "_containerView");
 }
 %end
 
 %hook SBControlCenterContentContainerView
 - (void)layoutSubviews {
     %orig;
-    UIImageView* artworkView = [TweakController sharedInstance].ccArtworkView;
-    if (!SHOULD_HOOK() || !BOOL_PROP(ccArtworkEnabled)) {
-        if (artworkView.superview != nil)
-                [artworkView removeFromSuperview];
-        return;
-    }
+//     UIImageView* artworkView = [TweakController sharedInstance].ccArtworkView;
+//     if (!SHOULD_HOOK() || !BOOL_PROP(ccArtworkEnabled)) {
+//         if (artworkView.superview != nil)
+//                 [artworkView removeFromSuperview];
+//         return;
+//     }
 
-    _UIBackdropView * backdrop = MSHookIvar<_UIBackdropView *>(self, "_backdropView");
-    // UIView* backView = ((UIView*)self.backdropView);
-    CGRect frame = backdrop.bounds;
-    if (!CGRectIsEmpty(frame)) {
-        artworkView.frame = [UIScreen mainScreen].bounds;
+//     _UIBackdropView * backdrop = MSHookIvar<_UIBackdropView *>(self, "_backdropView");
+//     // UIView* backView = ((UIView*)self.backdropView);
+//     CGRect frame = backdrop.bounds;
+//     if (!CGRectIsEmpty(frame)) {
+//         artworkView.frame = [UIScreen mainScreen].bounds;
 
-        if (artworkView.image == nil) {
-            artworkView.hidden = YES;
-        }
-        else {
-             artworkView.hidden = NO;
-            if (artworkView.superview != self)
-                [artworkView removeFromSuperview];
-            [self insertSubview:artworkView belowSubview:backdrop];
-        }
+//         if (artworkView.image == nil) {
+//             artworkView.hidden = YES;
+//         }
+//         else {
+//              artworkView.hidden = NO;
+//             if (artworkView.superview != self)
+//                 [artworkView removeFromSuperview];
+//             [self insertSubview:artworkView belowSubview:backdrop];
+//         }
 
         
-    }
+//     }
 }
 
 %end

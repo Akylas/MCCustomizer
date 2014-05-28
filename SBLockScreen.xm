@@ -10,33 +10,33 @@
     return MSHookIvar<_UIBackdropView*>(self, "_wallpaperBlurView");
 }
 
-- (void)layoutSubviews {
-    %orig;
-    UIImageView* artworkView = [TweakController sharedInstance].lsArtworkView;
-    if (!SHOULD_HOOK() || !BOOL_PROP(lsArtworkEnabled)) {
-        if (artworkView.superview != nil)
-                [artworkView removeFromSuperview];
-        return;
-    }
-    SBFWallpaperView * _lockscreenWallpaperView = MSHookIvar<SBFWallpaperView *>([%c(SBWallpaperController) sharedInstance], "_lockscreenWallpaperView");
+// - (void)layoutSubviews {
+    // %orig;
+//     UIImageView* artworkView = [TweakController sharedInstance].lsArtworkView;
+//     if (!SHOULD_HOOK() || !BOOL_PROP(lsArtworkEnabled)) {
+//         if (artworkView.superview != nil)
+//                 [artworkView removeFromSuperview];
+//         return;
+//     }
+//     SBFWallpaperView * _lockscreenWallpaperView = MSHookIvar<SBFWallpaperView *>([%c(SBWallpaperController) sharedInstance], "_lockscreenWallpaperView");
 
-    // _UIBackdropView * backdrop = MSHookIvar<_UIBackdropView *>(self, "_wallpaperBlurView");
-    CGRect frame = _lockscreenWallpaperView.bounds;
-    if (!CGRectIsEmpty(frame)) {
-        artworkView.frame = [UIScreen mainScreen].bounds;
+//     // _UIBackdropView * backdrop = MSHookIvar<_UIBackdropView *>(self, "_wallpaperBlurView");
+//     CGRect frame = _lockscreenWallpaperView.bounds;
+//     if (!CGRectIsEmpty(frame)) {
+//         artworkView.frame = [UIScreen mainScreen].bounds;
 
-        if (artworkView.image == nil) {
-            artworkView.hidden = YES;
-        }
-        else {
-             artworkView.hidden = NO;
-            if (artworkView.superview != self)
-                [artworkView removeFromSuperview];
-            //1 to make sure we are above the wallpaper
-            [_lockscreenWallpaperView insertSubview:artworkView atIndex:1];
-        }
-    }
-}
+//         if (artworkView.image == nil) {
+//             artworkView.hidden = YES;
+//         }
+//         else {
+//              artworkView.hidden = NO;
+//             if (artworkView.superview != self)
+//                 [artworkView removeFromSuperview];
+//             //1 to make sure we are above the wallpaper
+//             [_lockscreenWallpaperView insertSubview:artworkView atIndex:1];
+//         }
+//     }
+// }
 
 -(float)_mediaControlsHeight
 {
@@ -57,10 +57,4 @@
     // Log (@"_layoutMediaControlsView %@", NSStringFromCGRect(frame));
 }
 
-// -(float)_mediaControlsY
-// {
-//     CGFloat result = %orig;
-//     // Log (@"_mediaControlsY %f", result);
-//     return result;
-// }
 %end

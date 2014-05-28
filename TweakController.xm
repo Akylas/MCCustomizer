@@ -15,7 +15,10 @@
     NSString *nowPlayingArtist;
     NSString *nowPlayingAlbum;
     UIImage *_nowPlayingImage;
-    
+
+    float _ccArtworkViewAlpha;
+    float _lsArtworkViewAlpha;
+
     BOOL _coverArtShouldChange;
     BOOL _playing;
     int _coverArtTestCount;
@@ -59,9 +62,11 @@
         _playing = NO;
         _ccArtworkView = [[UIImageView alloc] initWithFrame:CGRectZero];
         _ccArtworkView.contentMode = UIViewContentModeScaleAspectFill;
+        _ccArtworkViewAlpha = 1.0f;
 
         _lsArtworkView = [[UIImageView alloc] initWithFrame:CGRectZero];
         _lsArtworkView.contentMode = UIViewContentModeScaleAspectFill;
+        _lsArtworkViewAlpha = 1.0f;
         _settings = [NSMutableDictionary dictionaryWithDictionary:@{
             @"TweakEnabled":@(YES),
             @"ccArtworkEnabled":@(YES),
@@ -97,7 +102,12 @@
     return [[[TweakController sharedInstance] settings] objectForKey:key];
 }
 
--(void)setView:(UIView*)view hidden:(BOOL)hidden{
+-(void)setView:(UIView*)view hidden:(BOOL)hidden alpha:(float)alpha {
+    if (view.superview == nil) {
+        view.hidden = hidden;
+        view.alpha = alpha;
+        return;
+    }
     [UIView animateWithDuration:0.5
         delay:0.0
         options: UIViewAnimationCurveEaseOut
@@ -107,7 +117,7 @@
                 view.alpha = 0;
             } else {
                 view.hidden = NO;
-                view.alpha = 1;
+                view.alpha = alpha;
             }
         }
         completion:^(BOOL b)
@@ -121,32 +131,70 @@
 
 -(void)setHidden:(BOOL)hidden{
     if (!SHOULD_HOOK()) return;
-    [self setView:_ccArtworkView hidden:hidden && BOOL_PROP(ccArtworkEnabled)];
-    [self setView:_lsArtworkView hidden:hidden && BOOL_PROP(lsArtworkEnabled)];
+    Log(@"setHidden");
+    [self setView:_ccArtworkView hidden:hidden && BOOL_PROP(ccArtworkEnabled) alpha:_ccArtworkViewAlpha];
+    [self setView:_lsArtworkView hidden:hidden && BOOL_PROP(lsArtworkEnabled) alpha:_lsArtworkViewAlpha];
 }
 
-- (void)setNowPlayingImage:(UIImage *)image {
-    [NSObject cancelPreviousPerformRequestsWithTarget:self];
-    _coverArtShouldChange = NO;
-    if (image) {
-        _ccArtworkView.hidden = !BOOL_PROP(ccArtworkEnabled);
-        _lsArtworkView.hidden = !BOOL_PROP(lsArtworkEnabled);
+-(void)attachView:(UIImageView*)view toParent:(UIView*)toParent atIndex:(int)index enabled:(BOOL)enabled
+{
+    if (!enabled || !toParent || index < 0 || index > [[toParent subviews] count]) {
+        //either disabled or something is wrong let's remove the artwork
+        if (view.superview != nil)
+            [view removeFromSuperview];
+        return;
+    }
+   if (view.image == nil) {
+        //no need to attach for now
+        view.hidden = YES;
+        return;
+    }
+    // in both cases "lockscreen" and "controlcenter" we need to be fullscreen
+    view.frame = [UIScreen mainScreen].bounds;
+    view.hidden = NO;
+    if (view.superview != toParent || [[toParent subviews] indexOfObject:view] != index)
+    {
+        [view removeFromSuperview];
+        [toParent insertSubview:view atIndex:index];
+    }
+}
+
+-(void)setNowPlayingImage:(UIImage*)image forArtworkView:(UIImageView*)artworkView enabled:(BOOL)enabled
+{
+    artworkView.image = image;
+    if (artworkView == _ccArtworkView){
+        //ControlCenter
+        SBControlCenterController *ccController = [%c(SBControlCenterController) sharedInstanceIfExists];
+        if (ccController) {
+            SBControlCenterContentContainerView* containerView = ccController.viewController.containerView.contentContainerView;
+            _UIBackdropView * backdrop = MSHookIvar<_UIBackdropView *>(containerView, "_backdropView");
+            int index = [[containerView subviews] indexOfObject:backdrop];
+            [self attachView:artworkView toParent:containerView atIndex:index enabled:enabled];
+        }
+    }
+    else if (artworkView == _lsArtworkView){
+       //Lockscreen
+        SBFWallpaperView * _lockscreenWallpaperView = MSHookIvar<SBFWallpaperView *>([%c(SBWallpaperController) sharedInstance], "_lockscreenWallpaperView");
+        [self attachView:_lsArtworkView toParent:_lockscreenWallpaperView atIndex:1 enabled:enabled];
     }
 
-    _ccArtworkView.image = _lsArtworkView.image = _nowPlayingImage = image;
+    if (!enabled) return;
 
+    // everything is ok lets animate to the new image (which might be null)
     CATransition *transition = [CATransition animation];
     transition.duration = 0.5f;
     transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
     transition.type = kCATransitionFade;
 
-    [_ccArtworkView.layer addAnimation:transition forKey:nil];
-    [_lsArtworkView.layer addAnimation:transition forKey:nil];
+    [artworkView.layer addAnimation:transition forKey:nil];
+}
 
-    SBControlCenterController *ccController = [%c(SBControlCenterController) sharedInstanceIfExists];
-    if (ccController) {
-        [ccController.viewController.containerView setNeedsLayout];
-    }
+- (void)setNowPlayingImage:(UIImage *)image {
+    [NSObject cancelPreviousPerformRequestsWithTarget:self];
+    _coverArtShouldChange = NO;
+    _nowPlayingImage = image;
+    [self setNowPlayingImage:image forArtworkView:_ccArtworkView enabled:BOOL_PROP(ccArtworkEnabled)];
+    [self setNowPlayingImage:image forArtworkView:_lsArtworkView enabled:BOOL_PROP(lsArtworkEnabled)];
 }
 
 - (void)dataProviderDidLoad
@@ -225,8 +273,8 @@
 
 - (void)settingsDidChange {
     [self setHidden:!(_playing && SHOULD_HOOK())];
-    _ccArtworkView.alpha = FLOAT_PROP(ccArtworkOpacity);
-    _lsArtworkView.alpha = FLOAT_PROP(lsArtworkOpacity);
+    _ccArtworkViewAlpha = _ccArtworkView.alpha = FLOAT_PROP(ccArtworkOpacity);
+    _lsArtworkViewAlpha = _lsArtworkView.alpha = FLOAT_PROP(lsArtworkOpacity);
     _ccArtworkView.contentMode = BOOL_PROP(ccArtworkScaleToFit)?UIViewContentModeScaleAspectFit:UIViewContentModeScaleAspectFill;
     _lsArtworkView.contentMode = BOOL_PROP(lsArtworkScaleToFit)?UIViewContentModeScaleAspectFit:UIViewContentModeScaleAspectFill;
 }

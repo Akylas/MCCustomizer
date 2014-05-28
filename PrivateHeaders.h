@@ -282,18 +282,7 @@
 @end
 
 
-@interface SBControlCenterViewController : UIViewController
 
-- (id)containerView;
-@end
-
-@interface SBControlCenterController : UIViewController
-
-+ (id)sharedInstanceIfExists;
-+ (id)sharedInstance;
-- (SBControlCenterViewController*)viewController;
--(void)dismissAnimated:(BOOL)arg1 ;
-@end
 
 @interface SBMediaController : NSObject
 
@@ -338,5 +327,22 @@
 @end
 
 @interface SBControlCenterContentContainerView: UIView
+-(id)backdropView;
 @end
 
+@interface SBControlCenterContainerView: UIView
+-(SBControlCenterContentContainerView*)contentContainerView;
+@end
+
+@interface SBControlCenterViewController : UIViewController
+
+- (SBControlCenterContainerView*)containerView;
+@end
+
+@interface SBControlCenterController : UIViewController
+
++ (id)sharedInstanceIfExists;
++ (id)sharedInstance;
+- (SBControlCenterViewController*)viewController;
+-(void)dismissAnimated:(BOOL)arg1 ;
+@end
