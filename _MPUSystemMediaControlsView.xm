@@ -4,6 +4,7 @@
 #import <objc/runtime.h>
 
 static char const * const IsCCSectionKey = "IsCCSection";
+static char const * const FirstLayoutKey = "FirstLayout";
 
 #define volumeViewHeight 49.000000
 #define timeInformationViewHeight 34.000000
@@ -55,11 +56,10 @@ float getMediaControlsHeight(BOOL isLS)
     return height;
 }
 
-// static CGRect originalTrackInformationViewFrame;
-// static CGRect originalTransportControlsViewFrame;
-// static CGRect originalTimeInformationViewFrame;
-// static CGRect originalVolumeViewFrame;
-static BOOL firstLayout = TRUE;
+static CGRect originalTrackInformationViewFrame;
+static CGRect originalTransportControlsViewFrame;
+static CGRect originalTimeInformationViewFrame;
+static CGRect originalVolumeViewFrame;
 
 @interface _MPUSystemMediaControlsView()
 -(BOOL)gesturesEnabled ;
@@ -69,14 +69,24 @@ static BOOL firstLayout = TRUE;
 
 @implementation _MPUSystemMediaControlsView (Additions)
 @dynamic isCCSection;
+@dynamic firstLayout;
 
 - (BOOL)isCCSection {
     NSNumber *number = objc_getAssociatedObject(self, IsCCSectionKey);
-    return number?[number boolValue]:FALSE; 
+    return number?[number boolValue]:FALSE; //default is false
 }
 
 - (void)setIsCCSection:(BOOL)value {
     objc_setAssociatedObject(self, IsCCSectionKey,  [NSNumber numberWithBool: value], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (BOOL)firstLayout {
+    NSNumber *number = objc_getAssociatedObject(self, FirstLayoutKey);
+    return number?[number boolValue]:TRUE; //default is true
+}
+
+- (void)setFirstLayout:(BOOL)value {
+    objc_setAssociatedObject(self, FirstLayoutKey,  [NSNumber numberWithBool: value], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 @end
 
@@ -86,27 +96,27 @@ static BOOL firstLayout = TRUE;
 -(void)afterLayoutSubviews
 {
     if (!SHOULD_HOOK()) {
-        if (!firstLayout) {
-            Log(@"resetting layout");
+        if (![self firstLayout]) {
+            // Log(@"resetting layout %@", BOOL_TO_STRING([self isCCSection]));
             [self.volumeView setHidden:NO];
             [self.timeInformationView setHidden:NO];
             [self.trackInformationView setHidden:NO];
             [self.transportControlsView setHidden:NO];
-            // self.trackInformationView.frame = originalTrackInformationViewFrame;
-            // self.transportControlsView.frame = originalTransportControlsViewFrame;
-            // self.timeInformationView.frame = originalTimeInformationViewFrame;
-            // self.volumeView.frame = originalVolumeViewFrame;
-            firstLayout = YES;
+            self.trackInformationView.frame = originalTrackInformationViewFrame;
+            self.transportControlsView.frame = originalTransportControlsViewFrame;
+            self.timeInformationView.frame = originalTimeInformationViewFrame;
+            self.volumeView.frame = originalVolumeViewFrame;
+            self.firstLayout = YES;
         }
         return;
     }
-    if (firstLayout) {
-        Log(@"saving layout");
-        // originalTrackInformationViewFrame = self.trackInformationView.frame;
-        // originalTransportControlsViewFrame = self.transportControlsView.frame;
-        // originalTimeInformationViewFrame = self.timeInformationView.frame;
-        // originalVolumeViewFrame = self.volumeView.frame;
-        firstLayout = NO;
+    if ([self firstLayout]) {
+        // Log(@"saving layout %@", BOOL_TO_STRING([self isCCSection]));
+        originalTrackInformationViewFrame = self.trackInformationView.frame;
+        originalTransportControlsViewFrame = self.transportControlsView.frame;
+        originalTimeInformationViewFrame = self.timeInformationView.frame;
+        originalVolumeViewFrame = self.volumeView.frame;
+        self.firstLayout = NO;
     }
     BOOL hideVolume, hideInfo, hideTime, hideButtons;
     BOOL isCCControl = [self isCCSection];

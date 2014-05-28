@@ -130,8 +130,6 @@
 }
 
 -(void)setHidden:(BOOL)hidden{
-    if (!SHOULD_HOOK()) return;
-    Log(@"setHidden");
     [self setView:_ccArtworkView hidden:hidden && BOOL_PROP(ccArtworkEnabled) alpha:_ccArtworkViewAlpha];
     [self setView:_lsArtworkView hidden:hidden && BOOL_PROP(lsArtworkEnabled) alpha:_lsArtworkViewAlpha];
 }
@@ -168,7 +166,7 @@
         if (ccController) {
             SBControlCenterContentContainerView* containerView = ccController.viewController.containerView.contentContainerView;
             _UIBackdropView * backdrop = MSHookIvar<_UIBackdropView *>(containerView, "_backdropView");
-            int index = [[containerView subviews] indexOfObject:backdrop];
+            int index = [[containerView subviews] indexOfObject:(artworkView.superview != containerView)?backdrop:artworkView];
             [self attachView:artworkView toParent:containerView atIndex:index enabled:enabled];
         }
     }
@@ -273,6 +271,13 @@
 
 - (void)settingsDidChange {
     [self setHidden:!(_playing && SHOULD_HOOK())];
+    if(_ccArtworkView.superview) {
+        [_ccArtworkView.superview setNeedsLayout];
+    }
+    if(_lsArtworkView.superview) {
+        //we need to request a layout if the change requires it
+        [_lsArtworkView.superview setNeedsLayout];
+    }
     _ccArtworkViewAlpha = _ccArtworkView.alpha = FLOAT_PROP(ccArtworkOpacity);
     _lsArtworkViewAlpha = _lsArtworkView.alpha = FLOAT_PROP(lsArtworkOpacity);
     _ccArtworkView.contentMode = BOOL_PROP(ccArtworkScaleToFit)?UIViewContentModeScaleAspectFit:UIViewContentModeScaleAspectFill;

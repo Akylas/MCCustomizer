@@ -12,6 +12,8 @@
 
 // - (void)layoutSubviews {
     // %orig;
+    // Log(@"_mediaControlsContainerView parent %p", _mediaControlsContainerView.superview);
+    // Log(@"_mediaControlsView parent %p", _mediaControlsView.superview);
 //     UIImageView* artworkView = [TweakController sharedInstance].lsArtworkView;
 //     if (!SHOULD_HOOK() || !BOOL_PROP(lsArtworkEnabled)) {
 //         if (artworkView.superview != nil)
