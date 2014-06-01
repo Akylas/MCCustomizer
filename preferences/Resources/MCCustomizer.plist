@@ -32,6 +32,14 @@
          <key>ALSettingsKey</key>       <string>DefaultApp</string>
          <key>ALSingleEnabledMode</key> <true/>
      </dict>
+     <dict>
+            <key>cell</key>            <string>PSSwitchCell</string>
+            <key>default</key>         <false/>
+            <key>defaults</key>        <string>com.akylas.mccustomizer</string>
+            <key>label</key>           <string>Gestures direction inversed</string>
+            <key>key</key>             <string>gesturesInversed</string>
+            <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
+        </dict>
 
      <dict>
          <key>cell</key>                <string>PSGroupCell</string>

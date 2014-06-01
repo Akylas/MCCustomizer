@@ -63,6 +63,7 @@ static CGRect originalVolumeViewFrame;
 
 @interface _MPUSystemMediaControlsView()
 -(BOOL)gesturesEnabled ;
+-(BOOL)gesturesInversed ;
 -(void)afterLayoutSubviews;
 -(float)getMediaControlsHeight;
 @end
@@ -199,8 +200,7 @@ static CGRect originalVolumeViewFrame;
 }
 
 -(id)initWithStyle:(int)arg1 {
-    id view = %orig;
-
+    UIView* view = %orig;
     UISwipeGestureRecognizer *swipeReco = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeLeftGesture:)];
     [swipeReco setDirection:(UISwipeGestureRecognizerDirectionLeft)];
     [view addGestureRecognizer:swipeReco];
@@ -212,7 +212,6 @@ static CGRect originalVolumeViewFrame;
     UILongPressGestureRecognizer *longPressReco = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPressGesture:)];
     longPressReco.delegate = (id<UILongPressGestureRecognizerDelegate>)self;
     [view addGestureRecognizer:longPressReco];
-
     
     return view;
 }
@@ -225,6 +224,13 @@ static CGRect originalVolumeViewFrame;
     return ((isCCControl && BOOL_PROP(ccGesturesEnabled)) || (!isCCControl && BOOL_PROP(lsGesturesEnabled)));
 }
 
+%new
+-(BOOL)gesturesInversed 
+{
+    return BOOL_PROP(gesturesInversed);
+}
+
+
 
 %new
 - (void) handleDoubleTap:(UIGestureRecognizer*) sender
@@ -236,14 +242,14 @@ static CGRect originalVolumeViewFrame;
 -(void)handleSwipeLeftGesture:(UISwipeGestureRecognizer*)sender
 {
     if (![self gesturesEnabled]) return;
-    [[%c(SBMediaController) sharedInstance] changeTrack:1];
+    [[%c(SBMediaController) sharedInstance] changeTrack:[self gesturesInversed]?-1:1];
 }
 
 %new
 -(void)handleSwipeRightGesture:(UISwipeGestureRecognizer*)sender
 {
     if (![self gesturesEnabled]) return;
-    [[%c(SBMediaController) sharedInstance] changeTrack:-1];
+    [[%c(SBMediaController) sharedInstance] changeTrack:[self gesturesInversed]?1:-1];
 }
 
 %new
