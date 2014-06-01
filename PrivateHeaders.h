@@ -16,6 +16,8 @@
 @end
 
 @interface NowPlayingArtPluginController : NSObject
+- (id)backgroundView;
+- (id)view;
 @end
 
 @interface _UIBackdropViewSettings : NSObject
