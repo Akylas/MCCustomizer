@@ -1,4 +1,4 @@
-Package: com.akylas.ccblurmusic
+Package: com.akylas.mccustomizer
 Name: Music Controls Customizer
 Depends: de.j-gessner.ccloader, firmware (>= 7.0)
 Version: 0.0.1
