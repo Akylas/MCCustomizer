@@ -1,4 +1,4 @@
-#import "TweakController.h"
+#import "MCCTweakController.h"
 #include <dlfcn.h>
 
 static void reloadSettings() {
@@ -9,8 +9,8 @@ static void reloadSettings() {
     if (!settings)
         return;
 
-    [[TweakController sharedInstance] applySettings:settings];
-    [[TweakController sharedInstance] settingsDidChange];
+    [[MCCTweakController sharedInstance] applySettings:settings];
+    [[MCCTweakController sharedInstance] settingsDidChange];
 
 }
 
