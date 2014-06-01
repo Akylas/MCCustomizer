@@ -1,7 +1,4 @@
 
-@class SBBlurryArtworkView;
-@class MCCustomizerSection;
-
 #define PREFERENCES_PATH @"/User/Library/Preferences/com.akylas.mccustomizer.plist"
 #define PREFERENCES_CHANGED_NOTIFICATION "com.akylas.mccustomizer.preferences-changed"
 
@@ -10,7 +7,10 @@
 #define TAG @"MCCustomizer"
 #define Log(x, ...) NSLog(@"[%@] " x, TAG, ##__VA_ARGS__)
 
-@interface TweakController : NSObject {
+#define CLASS_STRING(object) NSStringFromClass([object class])
+
+@class SBLockScreenView;
+@interface MCCTweakController : NSObject {
 
 }
 @property (nonatomic, retain) NSDictionary* settings;
@@ -23,14 +23,17 @@
 
 - (void)settingsDidChange;
 - (void)applySettings:(NSDictionary *)settings;
+- (void)setLockscreenView:(SBLockScreenView*)view;
+-(void)nowPlayingArtPluginControllerWillAppear;
+-(void)nowPlayingArtViewLayoutSubviews:(UIView*)view;
 
 - (void)dataProviderDidLoad;
 -(void)currentSongChanged;
 +(id)getProp:(NSString*)key;
 
-#define BOOL_PROP(val) [[TweakController getProp:[NSString stringWithUTF8String:#val]] boolValue]
-#define STRING_PROP(val) [TweakController getProp:[NSString stringWithUTF8String:#val]]
-#define FLOAT_PROP(val) [[TweakController getProp:[NSString stringWithUTF8String:#val]] floatValue]
+#define BOOL_PROP(val) [[MCCTweakController getProp:[NSString stringWithUTF8String:#val]] boolValue]
+#define STRING_PROP(val) [MCCTweakController getProp:[NSString stringWithUTF8String:#val]]
+#define FLOAT_PROP(val) [[MCCTweakController getProp:[NSString stringWithUTF8String:#val]] floatValue]
 #define SHOULD_HOOK() BOOL_PROP(TweakEnabled)
 
 @end

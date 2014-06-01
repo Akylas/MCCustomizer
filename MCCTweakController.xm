@@ -1,11 +1,11 @@
-#import "TweakController.h"
+#import "MCCTweakController.h"
 #import "PrivateHeaders.h"
 
 
 #define MAX_COVER_TEST 1
 
 
-@implementation TweakController
+@implementation MCCTweakController
 {
     UIImageView *_ccArtworkView;
     UIImageView *_lsArtworkView;
@@ -16,6 +16,8 @@
     NSString *nowPlayingAlbum;
     UIImage *_nowPlayingImage;
 
+    SBLockScreenView* _lockscreenView;
+
     float _ccArtworkViewAlpha;
     float _lsArtworkViewAlpha;
 
@@ -24,6 +26,47 @@
     int _coverArtTestCount;
 }
 @synthesize nowPlayingImage = _nowPlayingImage;
+
+- (void)setLockscreenView:(SBLockScreenView*)view
+{
+    _lockscreenView = view;
+    // if (_lsArtworkView) {
+    //     _UIBackdropView * backdrop = MSHookIvar<_UIBackdropView *>(_lockscreenView, "_wallpaperBlurView");
+    //     int index = [[_lockscreenView subviews] indexOfObject:(_lsArtworkView.superview != _lockscreenView)?backdrop:_lsArtworkView];
+    //     [self attachView:_lsArtworkView toParent:_lockscreenView atIndex:index enabled:BOOL_PROP(lsArtworkEnabled)];
+    // }
+}
+
+-(void)nowPlayingArtPluginControllerWillAppear {
+    // if (_lsArtworkView.image) {
+        // Log(@"nowPlayingArtPluginControllerWillAppear");
+        // int index = (artworkView.superview == _lockscreenWallpaperView)?[[_lockscreenWallpaperView subviews] indexOfObject:artworkView]:1;
+        // [self attachView:artworkView toParent:_lockscreenWallpaperView atIndex:index enabled:enabled];
+        // [self setNowPlayingImage:_lsArtworkView.image forArtworkView:_lsArtworkView enabled:BOOL_PROP(lsArtworkEnabled)];
+    // }
+}
+
+-(void)nowPlayingArtViewLayoutSubviews:(UIView*)view {
+    // if (_lsArtworkView.image) {
+    //     SBLockScreenScrollView *scrollView = nil;
+    //     UIView *superview = view.superview;
+    //     Class SBLockScreenScrollViewClass = %c(SBLockScreenScrollView);
+    //     while (scrollView == nil) {
+    //         for (UIView *subview in superview.subviews) {
+    //             if ([subview isKindOfClass:SBLockScreenScrollViewClass])
+    //                 scrollView = (SBLockScreenScrollView *)subview;
+    //         }
+
+    //         superview = superview.superview;
+    //         if (superview == nil)
+    //             break;
+    //     }
+    //     superview = scrollView.superview;
+    //     if (_lsArtworkView.superview != superview) {
+    //         [superview insertSubview:_lsArtworkView belowSubview:scrollView];
+    //     }
+    // }
+}
 
 + (instancetype)sharedInstance {
 
@@ -58,48 +101,50 @@
     self = [super init];
 
     if (self) {
-         _coverArtShouldChange = NO;
-        _playing = NO;
-        _ccArtworkView = [[UIImageView alloc] initWithFrame:CGRectZero];
-        _ccArtworkView.contentMode = UIViewContentModeScaleAspectFill;
-        _ccArtworkViewAlpha = 1.0f;
+       _coverArtShouldChange = NO;
+       _playing = NO;
+       _ccArtworkView = [[UIImageView alloc] initWithFrame:CGRectZero];
+       _ccArtworkView.contentMode = UIViewContentModeScaleAspectFill;
+       _ccArtworkViewAlpha = 1.0f;
 
-        _lsArtworkView = [[UIImageView alloc] initWithFrame:CGRectZero];
-        _lsArtworkView.contentMode = UIViewContentModeScaleAspectFill;
-        _lsArtworkViewAlpha = 1.0f;
-        _settings = [NSMutableDictionary dictionaryWithDictionary:@{
-            @"TweakEnabled":@(YES),
-            @"ccArtworkEnabled":@(YES),
-            @"lsArtworkEnabled":@(YES),
-            @"lsShowVolume":@(YES),
-            @"lsShowTime":@(YES),
-            @"lsShowButtons":@(YES),
-            @"lsShowInfo":@(YES),
-            @"ccShowVolume":@(YES),
-            @"ccShowTime":@(YES),
-            @"ccShowButtons":@(YES),
-            @"ccShowInfo":@(YES),
-            @"ccGesturesEnabled":@(YES),
-            @"lsGesturesEnabled":@(YES),
-            @"ccNoPlayingText":@"No Music playing",
-            @"lsNoPlayingText":@"No Music playing",
-            @"ccArtworkOpacity":@(1.0),
-            @"lsArtworkOpacity":@(1.0),
-            @"ccArtworkScaleToFit":@(NO),
-            @"lsArtworkScaleToFit":@(NO),
-            @"ccOneTapToOpenNoMusic":@(YES),
-            @"lsOneTapToOpenNoMusic":@(YES),
-            @"ccHideOnPlayPause":@(NO),
-            @"DefaultApp":@"com.apple.Music"
-        }];
-        _didLoadSettings = NO;
-    }
+       _lsArtworkView = [[UIImageView alloc] initWithFrame:CGRectZero];
+       _lsArtworkView.contentMode = UIViewContentModeScaleAspectFill;
+       _lsArtworkViewAlpha = 1.0f;
+       _settings = [NSMutableDictionary dictionaryWithDictionary:@{
+        @"TweakEnabled":@(YES),
+        @"ccArtworkEnabled":@(YES),
+        @"lsArtworkEnabled":@(YES),
+        @"lsShowVolume":@(YES),
+        @"lsShowTime":@(YES),
+        @"lsShowButtons":@(YES),
+        @"lsShowInfo":@(YES),
+        @"ccShowVolume":@(YES),
+        @"ccShowTime":@(YES),
+        @"ccShowButtons":@(YES),
+        @"ccShowInfo":@(YES),
+        @"ccGesturesEnabled":@(YES),
+        @"lsGesturesEnabled":@(YES),
+        @"gesturesInversed":@(NO),
+        @"ccNoPlayingText":@"No Music playing",
+        @"lsNoPlayingText":@"No Music playing",
+        @"ccArtworkOpacity":@(1.0),
+        @"lsArtworkOpacity":@(1.0),
+        @"ccArtworkScaleToFit":@(NO),
+        @"lsArtworkScaleToFit":@(NO),
+        @"ccOneTapToOpenNoMusic":@(YES),
+        @"lsOneTapToOpenNoMusic":@(YES),
+        @"ccHideOnPlayPause":@(NO),
+        @"lsHideDefaultArtwork":@(NO),
+        @"DefaultApp":@"com.apple.Music"
+    }];
+       _didLoadSettings = NO;
+   }
 
-    return self;
+   return self;
 }
 
 +(id)getProp:(NSString*)key{
-    return [[[TweakController sharedInstance] settings] objectForKey:key];
+    return [[[MCCTweakController sharedInstance] settings] objectForKey:key];
 }
 
 -(void)setView:(UIView*)view hidden:(BOOL)hidden alpha:(float)alpha {
@@ -126,7 +171,7 @@
                 view.hidden = YES;
             }
         }
-    ];
+        ];
 }
 
 -(void)setHidden:(BOOL)hidden{
@@ -142,16 +187,18 @@
             [view removeFromSuperview];
         return;
     }
-   if (view.image == nil) {
+    if (view.image == nil) {
         //no need to attach for now
         view.hidden = YES;
         return;
     }
+
     // in both cases "lockscreen" and "controlcenter" we need to be fullscreen
-    view.frame = [UIScreen mainScreen].bounds;
-    view.hidden = NO;
+    
     if (view.superview != toParent || [[toParent subviews] indexOfObject:view] != index)
     {
+        view.frame = [UIScreen mainScreen].bounds;
+        view.hidden = !_playing;
         [view removeFromSuperview];
         [toParent insertSubview:view atIndex:index];
     }
@@ -171,9 +218,9 @@
         }
     }
     else if (artworkView == _lsArtworkView){
-       //Lockscreen
         SBFWallpaperView * _lockscreenWallpaperView = MSHookIvar<SBFWallpaperView *>([%c(SBWallpaperController) sharedInstance], "_lockscreenWallpaperView");
-        [self attachView:_lsArtworkView toParent:_lockscreenWallpaperView atIndex:1 enabled:enabled];
+        int index = (artworkView.superview == _lockscreenWallpaperView)?[[_lockscreenWallpaperView subviews] indexOfObject:artworkView]:1;
+        [self attachView:artworkView toParent:_lockscreenWallpaperView atIndex:index enabled:enabled];
     }
 
     if (!enabled) return;
@@ -217,31 +264,31 @@
     }
     if (hasChanges) {
         // Log(@"dataProviderDidLoad hasChanges");
-       NSDictionary* info = [mc _nowPlayingInfo];
+     NSDictionary* info = [mc _nowPlayingInfo];
 
-        NSData *data = [info objectForKey:@"artworkData"];
-        if (data) {
-            UIImage *image = [[UIImage alloc] initWithData:data];
-            self.nowPlayingImage = image;
-       } else {
-            _coverArtShouldChange = YES;
-            _coverArtTestCount = 0;
-            [self performSelector:@selector(setNowPlayingImage:) withObject:nil afterDelay:2.0f];
-        }
-    } else if (_coverArtShouldChange) {
-        NSData *data = [[mc _nowPlayingInfo] objectForKey:@"artworkData"];
-        if (data) {
-            UIImage *image = [[UIImage alloc] initWithData:data];
-            self.nowPlayingImage = image;
-       }
-        else if (_coverArtTestCount < MAX_COVER_TEST) {
-            _coverArtTestCount++;
-            [self performSelector:@selector(setNowPlayingImage:) withObject:nil afterDelay:1.0f];
-        }
-        else {
-            self.nowPlayingImage = nil;
-        }
+     NSData *data = [info objectForKey:@"artworkData"];
+     if (data) {
+        UIImage *image = [[UIImage alloc] initWithData:data];
+        self.nowPlayingImage = image;
+    } else {
+        _coverArtShouldChange = YES;
+        _coverArtTestCount = 0;
+        [self performSelector:@selector(setNowPlayingImage:) withObject:nil afterDelay:2.0f];
     }
+} else if (_coverArtShouldChange) {
+    NSData *data = [[mc _nowPlayingInfo] objectForKey:@"artworkData"];
+    if (data) {
+        UIImage *image = [[UIImage alloc] initWithData:data];
+        self.nowPlayingImage = image;
+    }
+    else if (_coverArtTestCount < MAX_COVER_TEST) {
+        _coverArtTestCount++;
+        [self performSelector:@selector(setNowPlayingImage:) withObject:nil afterDelay:1.0f];
+    }
+    else {
+        self.nowPlayingImage = nil;
+    }
+}
 }
 
 - (void)playbackStateChanged:(BOOL)playing
@@ -257,7 +304,7 @@
         if (data) {
             UIImage *image = [[UIImage alloc] initWithData:data];
             self.nowPlayingImage = image;
-       }
+        }
     }
     [self setHidden:!_playing];
 }
@@ -290,11 +337,11 @@
     _didLoadSettings = YES;
     [_settings enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop){
         id newValue = [settings objectForKey:key];
-         if (newValue) {
+        if (newValue) {
             [_settings setValue:newValue forKey:key];
-         }
+        }
     }]; 
-    Log(@"applySettings %@", _settings);
+    // Log(@"applySettings %@", _settings);
 }
 
 @end
