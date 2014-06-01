@@ -1,13 +1,25 @@
-#import "TweakController.h"
+#import "MCCTweakController.h"
+#import "PrivateHeaders.h"
+
 
 %hook NowPlayingArtPluginController
 - (void)viewWillAppear:(BOOL)animated {
     %orig;
-    [[TweakController sharedInstance] dataProviderDidLoad];
+    [[MCCTweakController sharedInstance] dataProviderDidLoad];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     %orig;
-    [[TweakController sharedInstance] dataProviderDidLoad];
+    [[MCCTweakController sharedInstance] dataProviderDidLoad];
 }
+
+%end
+
+
+%hook _NowPlayingArtView
+
+// - (void)layoutSubviews {
+//     %orig;
+// }
+
 %end

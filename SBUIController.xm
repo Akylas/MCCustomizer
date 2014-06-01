@@ -1,4 +1,4 @@
-#import "TweakController.h"
+#import "MCCTweakController.h"
 #import "PrivateHeaders.h"
 
 %hook SBUIController
@@ -16,7 +16,7 @@
 
 %new
 - (void)currentSongChanged:(NSNotification *)notification {
-    [[TweakController sharedInstance] currentSongChanged];
+    [[MCCTweakController sharedInstance] currentSongChanged];
 }
 
 // Fix for the original lockscreen wallpaper not showing when locked and paused
@@ -25,7 +25,7 @@
 
     SBMediaController *mediaController = [%c(SBMediaController) sharedInstance];
     if (!mediaController.isPlaying) {
-        [TweakController sharedInstance].nowPlayingImage = nil;
+        [MCCTweakController sharedInstance].nowPlayingImage = nil;
     }
 }
 

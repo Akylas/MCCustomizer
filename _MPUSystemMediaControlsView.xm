@@ -1,6 +1,6 @@
 
 #import "_MPUSystemMediaControlsView.h"
-#import "TweakController.h"
+#import "MCCTweakController.h"
 #import <objc/runtime.h>
 
 static char const * const IsCCSectionKey = "IsCCSection";

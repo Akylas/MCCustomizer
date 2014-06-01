@@ -1,4 +1,4 @@
-#import "TweakController.h"
+#import "MCCTweakController.h"
 #import "PrivateHeaders.h"
 #import "_MPUSystemMediaControlsView.h"
 
@@ -19,34 +19,10 @@
 %end
 
 %hook SBControlCenterContentContainerView
-- (void)layoutSubviews {
-    %orig;
-//     UIImageView* artworkView = [TweakController sharedInstance].ccArtworkView;
-//     if (!SHOULD_HOOK() || !BOOL_PROP(ccArtworkEnabled)) {
-//         if (artworkView.superview != nil)
-//                 [artworkView removeFromSuperview];
-//         return;
-//     }
+// - (void)layoutSubviews {
+//     %orig;
 
-//     _UIBackdropView * backdrop = MSHookIvar<_UIBackdropView *>(self, "_backdropView");
-//     // UIView* backView = ((UIView*)self.backdropView);
-//     CGRect frame = backdrop.bounds;
-//     if (!CGRectIsEmpty(frame)) {
-//         artworkView.frame = [UIScreen mainScreen].bounds;
-
-//         if (artworkView.image == nil) {
-//             artworkView.hidden = YES;
-//         }
-//         else {
-//              artworkView.hidden = NO;
-//             if (artworkView.superview != self)
-//                 [artworkView removeFromSuperview];
-//             [self insertSubview:artworkView belowSubview:backdrop];
-//         }
-
-        
-//     }
-}
+// }
 
 %end
 

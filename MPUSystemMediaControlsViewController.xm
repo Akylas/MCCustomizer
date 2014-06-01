@@ -1,5 +1,5 @@
 #import "_MPUSystemMediaControlsView.h"
-#import "TweakController.h"
+#import "MCCTweakController.h"
 
 @interface _MPUSystemMediaControlsView(gestures)
 -(BOOL)gesturesEnabled;

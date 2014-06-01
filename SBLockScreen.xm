@@ -1,4 +1,4 @@
-#import "TweakController.h"
+#import "MCCTweakController.h"
 #import "PrivateHeaders.h"
 #import "_MPUSystemMediaControlsView.h"
 
