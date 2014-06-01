@@ -1,4 +1,4 @@
-Spectral
+Music Controls Customizer
 =============
 
 Give youo control over the iOS7 music controller
