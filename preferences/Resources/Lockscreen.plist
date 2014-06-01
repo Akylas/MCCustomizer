@@ -24,6 +24,14 @@
             <key>key</key>             <string>lsArtworkScaleToFit</string>
             <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
         </dict>
+         <dict>
+            <key>cell</key>            <string>PSSwitchCell</string>
+            <key>default</key>         <true/>
+            <key>defaults</key>        <string>com.akylas.mccustomizer</string>
+            <key>label</key>           <string>Hide default cover</string>
+            <key>key</key>             <string>lsHideDefaultArtwork</string>
+            <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
+        </dict>
 
         <dict>
             <key>cell</key>            <string>PSGroupCell</string>
@@ -105,14 +113,14 @@
             <key>key</key>             <string>lsGesturesEnabled</string>
             <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
         </dict>
-        <dict>
+<!--         <dict>
             <key>cell</key>            <string>PSSwitchCell</string>
             <key>default</key>         <true/>
             <key>defaults</key>        <string>com.akylas.mccustomizer</string>
             <key>label</key>           <string>No Music: One tap to open</string>
             <key>key</key>             <string>lsOneTapToOpenNoMusic</string>
             <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
-        </dict>
+        </dict> -->
 
     </array>
     <key>title</key>           <string>Lockscreen</string>
