@@ -169,6 +169,10 @@ static CGRect originalVolumeViewFrame;
         self.transportControlsView.frame = frame;
         top += (volumeViewTop - transportControlsViewTop);
     }
+    else {
+        //to add a little padding between info and volume
+        top += 5;
+    }
     if (!hideVolume) {
         frame = self.volumeView.frame;
         frame.origin.y = top;
