@@ -97,6 +97,7 @@
         @"ccShowAirplay":@(NO),
         @"lsShowAirplay":@(NO),
         @"DefaultApp":@"com.apple.Music",
+        @"alwaysUseDefaultApp":@(NO),
     }];
        _didLoadSettings = NO;
    }

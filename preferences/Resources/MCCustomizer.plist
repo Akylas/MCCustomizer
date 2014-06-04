@@ -74,3 +74,11 @@
  </array>
 </dict>
 </plist>
+            <dict>
+        <key>cell</key>                    <string>PSSwitchCell</string>
+        <key>default</key>                 <false/>
+        <key>defaults</key>                <string>com.akylas.mccustomizer</string>
+        <key>label</key>                   <string>Always launch default App</string>
+        <key>key</key>                     <string>alwaysUseDefaultApp</string>
+        <key>PostNotification</key>        <string>com.akylas.mccustomizer.preferences-changed</string>
+            </dict>

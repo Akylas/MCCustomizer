@@ -325,12 +325,12 @@ static CGRect originalVolumeViewFrame;
     if (sender.state == UIGestureRecognizerStateEnded) {
     } else if (sender.state == UIGestureRecognizerStateBegan) {
         SBApplication* app = [[%c(SBMediaController) sharedInstance] nowPlayingApplication];
-        if (app) {
-            [[%c(SBUIController) sharedInstance] activateApplicationAnimated:app];
+        NSString* defaultApp = STRING_PROP(DefaultApp);
+        if (BOOL_PROP(alwaysUseDefaultApp) || !app) {
+            [[%c(SBUIController) sharedInstance] activateApplicationAnimated:[[%c(SBApplicationController) sharedInstance] applicationWithDisplayIdentifier:defaultApp]];
         }
         else {
-            NSString* defaultApp = STRING_PROP(DefaultApp);
-            [[%c(SBUIController) sharedInstance] activateApplicationAnimated:[[%c(SBApplicationController) sharedInstance] applicationWithDisplayIdentifier:defaultApp]];
+            [[%c(SBUIController) sharedInstance] activateApplicationAnimated:app];
         }
     }
 }
