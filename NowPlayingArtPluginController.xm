@@ -14,12 +14,3 @@
 }
 
 %end
-
-
-%hook _NowPlayingArtView
-
-// - (void)layoutSubviews {
-//     %orig;
-// }
-
-%end

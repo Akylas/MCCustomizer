@@ -3,6 +3,7 @@
 
 @interface _MPUSystemMediaControlsView(gestures)
 -(BOOL)gesturesEnabled;
+-(UIView*)artworkView;
 @end
 
 %hook MPUSystemMediaControlsViewController
@@ -35,19 +36,13 @@
         }
     }
 }
-
--(void)viewWillAppear:(BOOL)arg1
+-(void)nowPlayingController:(id)arg1 nowPlayingInfoDidChange:(id)arg2
 {
-    UIView* superview = [self.view superview];
-    if ([superview isKindOfClass:%c(SBControlCenterSectionView)]) {
-        [self.mediaControlsView setIsCCSection:YES];
-    }
     %orig;
-}
-
-%new
--(UIView*)volumeView
-{
-    return (UIView*)[self.mediaControlsView volumeView];
+    BOOL current = [[self artworkView] isHidden];
+    BOOL newHidden  = BOOL_PROP(lsHideDefaultArtwork);
+    if (current != newHidden) {
+    [[self artworkView] setHidden:newHidden];
+    }
 }
 %end

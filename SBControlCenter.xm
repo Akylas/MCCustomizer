@@ -18,14 +18,6 @@
 }
 %end
 
-%hook SBControlCenterContentContainerView
-// - (void)layoutSubviews {
-//     %orig;
-
-// }
-
-%end
-
 %hook SBCCMediaControlsSectionController
 - (struct CGSize)contentSizeForOrientation:(long long)arg1
 {

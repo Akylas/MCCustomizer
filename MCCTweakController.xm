@@ -27,47 +27,6 @@
 }
 @synthesize nowPlayingImage = _nowPlayingImage;
 
-- (void)setLockscreenView:(SBLockScreenView*)view
-{
-    _lockscreenView = view;
-    // if (_lsArtworkView) {
-    //     _UIBackdropView * backdrop = MSHookIvar<_UIBackdropView *>(_lockscreenView, "_wallpaperBlurView");
-    //     int index = [[_lockscreenView subviews] indexOfObject:(_lsArtworkView.superview != _lockscreenView)?backdrop:_lsArtworkView];
-    //     [self attachView:_lsArtworkView toParent:_lockscreenView atIndex:index enabled:BOOL_PROP(lsArtworkEnabled)];
-    // }
-}
-
--(void)nowPlayingArtPluginControllerWillAppear {
-    // if (_lsArtworkView.image) {
-        // Log(@"nowPlayingArtPluginControllerWillAppear");
-        // int index = (artworkView.superview == _lockscreenWallpaperView)?[[_lockscreenWallpaperView subviews] indexOfObject:artworkView]:1;
-        // [self attachView:artworkView toParent:_lockscreenWallpaperView atIndex:index enabled:enabled];
-        // [self setNowPlayingImage:_lsArtworkView.image forArtworkView:_lsArtworkView enabled:BOOL_PROP(lsArtworkEnabled)];
-    // }
-}
-
--(void)nowPlayingArtViewLayoutSubviews:(UIView*)view {
-    // if (_lsArtworkView.image) {
-    //     SBLockScreenScrollView *scrollView = nil;
-    //     UIView *superview = view.superview;
-    //     Class SBLockScreenScrollViewClass = %c(SBLockScreenScrollView);
-    //     while (scrollView == nil) {
-    //         for (UIView *subview in superview.subviews) {
-    //             if ([subview isKindOfClass:SBLockScreenScrollViewClass])
-    //                 scrollView = (SBLockScreenScrollView *)subview;
-    //         }
-
-    //         superview = superview.superview;
-    //         if (superview == nil)
-    //             break;
-    //     }
-    //     superview = scrollView.superview;
-    //     if (_lsArtworkView.superview != superview) {
-    //         [superview insertSubview:_lsArtworkView belowSubview:scrollView];
-    //     }
-    // }
-}
-
 + (instancetype)sharedInstance {
 
     static dispatch_once_t once;
@@ -135,7 +94,7 @@
         @"lsOneTapToOpenNoMusic":@(YES),
         @"ccHideOnPlayPause":@(NO),
         @"lsHideDefaultArtwork":@(NO),
-        @"DefaultApp":@"com.apple.Music"
+        @"DefaultApp":@"com.apple.Music",
     }];
        _didLoadSettings = NO;
    }

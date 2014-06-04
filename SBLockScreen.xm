@@ -6,23 +6,24 @@
 
 -(void)setOverlay:(id)arg1
 {
-    if (BOOL_PROP(lsArtworkEnabled) && [MSHookIvar<NSString*>(self, "_bundleName") isEqualToString:@"NowPlayingArtLockScreen"]) {
+    if (SHOULD_HOOK() && BOOL_PROP(lsArtworkEnabled) && [MSHookIvar<NSString*>(self, "_bundleName") isEqualToString:@"NowPlayingArtLockScreen"]) {
         return;
     }
     %orig;
 }
 %end
 
-%hook SBLockScreenViewController
--(void)_setNowPlayingControllerEnabled:(BOOL)arg1 
-{
-    if (!BOOL_PROP(lsHideDefaultArtwork)) {
-        %orig;
-    }
-}
-%end
 %hook SBLockScreenView
 
+-(void)_layoutMediaControlsView
+{
+    %orig;
+    float height = getMediaControlsHeight(YES);
+    UIView* view = MSHookIvar<UIView*>(self, "_mediaControlsContainerView");
+    CGRect frame = view.frame;
+    frame.size.height = height;
+    view.frame = frame;
+}
 %new
 -(_UIBackdropView*) wallpaperBlurView
 {

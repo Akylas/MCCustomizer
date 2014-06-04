@@ -23,9 +23,6 @@
 
 - (void)settingsDidChange;
 - (void)applySettings:(NSDictionary *)settings;
-- (void)setLockscreenView:(SBLockScreenView*)view;
--(void)nowPlayingArtPluginControllerWillAppear;
--(void)nowPlayingArtViewLayoutSubviews:(UIView*)view;
 
 - (void)dataProviderDidLoad;
 -(void)currentSongChanged;

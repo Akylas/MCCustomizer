@@ -3,7 +3,8 @@
 #import "MCCTweakController.h"
 #import <objc/runtime.h>
 
-static char const * const IsCCSectionKey = "IsCCSection";
+
+// static char const * const IsCCSectionKey = "IsCCSection";
 static char const * const FirstLayoutKey = "FirstLayout";
 
 #define volumeViewHeight 49.000000
@@ -29,8 +30,6 @@ float getMediaControlsHeight(BOOL isLS)
         hideInfo = !BOOL_PROP(ccShowInfo);
         hideTime = !BOOL_PROP(ccShowTime);
         hideButtons = !BOOL_PROP(ccShowButtons);
-        
-        
     }
 
     CGFloat height = 0;
@@ -73,13 +72,9 @@ static CGRect originalVolumeViewFrame;
 @dynamic firstLayout;
 
 - (BOOL)isCCSection {
-    NSNumber *number = objc_getAssociatedObject(self, IsCCSectionKey);
-    return number?[number boolValue]:FALSE; //default is false
+    return ([self style] == 1);
 }
 
-- (void)setIsCCSection:(BOOL)value {
-    objc_setAssociatedObject(self, IsCCSectionKey,  [NSNumber numberWithBool: value], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
 
 - (BOOL)firstLayout {
     NSNumber *number = objc_getAssociatedObject(self, FirstLayoutKey);
@@ -98,7 +93,6 @@ static CGRect originalVolumeViewFrame;
 {
     if (!SHOULD_HOOK()) {
         if (![self firstLayout]) {
-            // Log(@"resetting layout %@", BOOL_TO_STRING([self isCCSection]));
             [self.volumeView setHidden:NO];
             [self.timeInformationView setHidden:NO];
             [self.trackInformationView setHidden:NO];
@@ -112,7 +106,6 @@ static CGRect originalVolumeViewFrame;
         return;
     }
     if ([self firstLayout]) {
-        // Log(@"saving layout %@", BOOL_TO_STRING([self isCCSection]));
         originalTrackInformationViewFrame = self.trackInformationView.frame;
         originalTransportControlsViewFrame = self.transportControlsView.frame;
         originalTimeInformationViewFrame = self.timeInformationView.frame;
@@ -141,7 +134,6 @@ static CGRect originalVolumeViewFrame;
         hideInfo = !BOOL_PROP(lsShowInfo);
         hideTime = !BOOL_PROP(lsShowTime);
         hideButtons = !BOOL_PROP(lsShowButtons);
-        
     }
     [self.volumeView setHidden:hideVolume];
     [self.timeInformationView setHidden:hideTime];
@@ -181,10 +173,28 @@ static CGRect originalVolumeViewFrame;
     }
 }
 
+// -(void)setFrame:(CGRect)frame {
+//     if (SHOULD_HOOK()) {
+//         frame.size.height = [self getMediaControlsHeight];
+//     }
+//     %orig(frame);
+
+//     Log(@"setFrame %@ %@", BOOL_TO_STRING([self isCCSection]), NSStringFromCGRect(frame));
+// }
+
+// -(CGRect)frame {
+//     CGRect result = %orig;
+//     if (SHOULD_HOOK()) {
+//         result.size.height = [self getMediaControlsHeight];
+//     }
+//     Log(@"getFrame %@", NSStringFromCGRect(result));
+//     return result;
+// }
+
 %new
 -(float)getMediaControlsHeight
 {
-    return getMediaControlsHeight([self isCCSection]);
+    return getMediaControlsHeight(![self isCCSection]);
 }
 
 // - (void)setFrame:(CGRect)frame {
@@ -195,6 +205,7 @@ static CGRect originalVolumeViewFrame;
 
 - (void)layoutSubviews {
     %orig;
+    Log(@"layoutSubviews");
     [self afterLayoutSubviews];
 }
 
@@ -233,8 +244,6 @@ static CGRect originalVolumeViewFrame;
 {
     return BOOL_PROP(gesturesInversed);
 }
-
-
 
 %new
 - (void) handleDoubleTap:(UIGestureRecognizer*) sender
