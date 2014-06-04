@@ -2,10 +2,15 @@
 #import "_MPUSystemMediaControlsView.h"
 #import "MCCTweakController.h"
 #import <objc/runtime.h>
+#import <MediaPlayer/MPVolumeView.h>
 
+@interface MPVolumeView()
+@property(nonatomic) BOOL showsVolumeSlider;
+@end
 
 // static char const * const IsCCSectionKey = "IsCCSection";
 static char const * const FirstLayoutKey = "FirstLayout";
+static char const * const AirPlayButtonKey = "AirPlayButton";
 
 #define volumeViewHeight 49.000000
 #define timeInformationViewHeight 34.000000
@@ -84,6 +89,15 @@ static CGRect originalVolumeViewFrame;
 - (void)setFirstLayout:(BOOL)value {
     objc_setAssociatedObject(self, FirstLayoutKey,  [NSNumber numberWithBool: value], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
+
+
+- (MPVolumeView*)airplayButton {
+    return objc_getAssociatedObject(self, AirPlayButtonKey);
+}
+
+- (void)setAirplayButton:(MPVolumeView*)value {
+    objc_setAssociatedObject(self, AirPlayButtonKey, value, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
 @end
 
 %hook _MPUSystemMediaControlsView
@@ -91,6 +105,7 @@ static CGRect originalVolumeViewFrame;
 %new
 -(void)afterLayoutSubviews
 {
+    MPVolumeView* volumeView = [self airplayButton];
     if (!SHOULD_HOOK()) {
         if (![self firstLayout]) {
             [self.volumeView setHidden:NO];
@@ -101,6 +116,7 @@ static CGRect originalVolumeViewFrame;
             self.transportControlsView.frame = originalTransportControlsViewFrame;
             self.timeInformationView.frame = originalTimeInformationViewFrame;
             self.volumeView.frame = originalVolumeViewFrame;
+            [volumeView setHidden:YES];
             self.firstLayout = YES;
         }
         return;
@@ -112,7 +128,7 @@ static CGRect originalVolumeViewFrame;
         originalVolumeViewFrame = self.volumeView.frame;
         self.firstLayout = NO;
     }
-    BOOL hideVolume, hideInfo, hideTime, hideButtons;
+    BOOL hideVolume, hideInfo, hideTime, hideButtons, hideAirPlay;
     BOOL isCCControl = [self isCCSection];
     MPUNowPlayingTitlesView* trackInformationView = ((MPUNowPlayingTitlesView*)self.trackInformationView);
 
@@ -129,11 +145,13 @@ static CGRect originalVolumeViewFrame;
         hideInfo = !BOOL_PROP(ccShowInfo);
         hideTime = !BOOL_PROP(ccShowTime);
         hideButtons = !BOOL_PROP(ccShowButtons);
+        hideAirPlay = !BOOL_PROP(ccShowAirplay);
     } else {
         hideVolume = !BOOL_PROP(lsShowVolume);
         hideInfo = !BOOL_PROP(lsShowInfo);
         hideTime = !BOOL_PROP(lsShowTime);
         hideButtons = !BOOL_PROP(lsShowButtons);
+        hideAirPlay = !BOOL_PROP(lsShowAirplay);
     }
     [self.volumeView setHidden:hideVolume];
     [self.timeInformationView setHidden:hideTime];
@@ -170,6 +188,35 @@ static CGRect originalVolumeViewFrame;
         frame.origin.y = top;
         frame.size.height = volumeViewHeight;
         self.volumeView.frame = frame;
+    }
+    if (!hideAirPlay && volumeView) {
+        [volumeView sizeToFit];
+        BOOL airplayHidden = NO;
+        CGRect airplayFrame = volumeView.frame;
+        CGFloat width = airplayFrame.size.width + 2; //for a little right padding
+        CGFloat height = airplayFrame.size.height;
+        CGRect myFrame = self.bounds;
+        if (!hideButtons) {
+            CGRect buttonsFrame = self.transportControlsView.frame;
+            airplayFrame.origin.x = CGRectGetMaxX(myFrame) - width;
+            airplayFrame.origin.y = CGRectGetMidY(buttonsFrame) - height/2.0f + 10.0f; //why is not centered without the 5?
+        }
+        else if (!hideInfo) {
+            CGRect infoFrame = self.trackInformationView.frame;
+            airplayFrame.origin.x = CGRectGetMaxX(myFrame) - width;
+            airplayFrame.origin.y = CGRectGetMidY(infoFrame) - height/2.0f;
+            infoFrame.size.width -= 2*width;
+            infoFrame.origin.x = width;
+            self.trackInformationView.frame = infoFrame;
+        }
+        else {
+            airplayHidden = YES;
+        }
+        volumeView.hidden = airplayHidden;        
+        volumeView.frame = airplayFrame;
+    }
+    else {
+        [volumeView setHidden:YES];    
     }
 }
 
@@ -227,7 +274,13 @@ static CGRect originalVolumeViewFrame;
     UILongPressGestureRecognizer *longPressReco = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPressGesture:)];
     longPressReco.delegate = (id<UILongPressGestureRecognizerDelegate>)self;
     [view addGestureRecognizer:longPressReco];
-    
+
+    MPVolumeView *volumeView = [[MPVolumeView alloc] init];
+    [volumeView setShowsVolumeSlider:NO];
+    [volumeView setHidden:!SHOULD_HOOK()];
+    [volumeView sizeToFit];
+    [view addSubview:volumeView];
+    [self setAirplayButton:volumeView];
     return view;
 }
 

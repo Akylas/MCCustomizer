@@ -94,6 +94,8 @@
         @"lsOneTapToOpenNoMusic":@(YES),
         @"ccHideOnPlayPause":@(NO),
         @"lsHideDefaultArtwork":@(NO),
+        @"ccShowAirplay":@(NO),
+        @"lsShowAirplay":@(NO),
         @"DefaultApp":@"com.apple.Music",
     }];
        _didLoadSettings = NO;
