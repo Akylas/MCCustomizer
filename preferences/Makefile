@@ -6,7 +6,7 @@ include theos/makefiles/common.mk
 BUNDLE_NAME = MCCustomizer
 MCCustomizer_FILES = MCCustomizer.mm
 MCCustomizer_INSTALL_PATH = /Library/PreferenceBundles
-MCCustomizer_FRAMEWORKS = UIKit
+MCCustomizer_FRAMEWORKS = UIKit CoreGraphics
 MCCustomizer_PRIVATE_FRAMEWORKS = Preferences
 
 include $(THEOS_MAKE_PATH)/bundle.mk

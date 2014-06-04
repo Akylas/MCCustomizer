@@ -1,79 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist
+  PUBLIC '-//Apple//DTD PLIST 1.0//EN'
+  'http://www.apple.com/DTDs/PropertyList-1.0.dtd'>
 <plist version="1.0">
     <dict>
-     <key>title</key>               <string>MCCustomizer</string>
-     <key>entry</key>               <dict>
-     <key>cell</key>                <string>PSLinkCell</string>
-     <key>icon</key>                <string>MCCustomizer.png</string>
-     <key>label</key>               <string>MCCustomizer</string>
- </dict>
- <key>items</key>               
- <array>
-     <dict>
-         <key>cell</key>                <string>PSGroupCell</string>
-     </dict>
-     <dict>
-         <key>cell</key>                <string>PSSwitchCell</string>
-         <key>default</key>             <true/>
-         <key>defaults</key>            <string>com.akylas.mccustomizer</string>
-         <key>label</key>               <string>Enabled</string>
-         <key>key</key>                 <string>TweakEnabled</string>
-         <key>PostNotification</key>    <string>com.akylas.mccustomizer.preferences-changed</string>
-     </dict>
-
-     <dict>
-         <key>cell</key>                <string>PSLinkCell</string>
-         <key>bundle</key>              <string>AppList</string>
-         <key>isController</key>        <string>1</string>
-         <key>label</key>               <string>Default Music Application</string>
-         <key>ALSettingsPath</key>      <string>/var/mobile/Library/Preferences/com.akylas.mccustomizer.plist</string>
-         <key>ALChangeNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
-         <key>ALSettingsKey</key>       <string>DefaultApp</string>
-         <key>ALSingleEnabledMode</key> <true/>
-     </dict>
-     <dict>
-            <key>cell</key>            <string>PSSwitchCell</string>
-            <key>default</key>         <false/>
-            <key>defaults</key>        <string>com.akylas.mccustomizer</string>
-            <key>label</key>           <string>Gestures direction inversed</string>
-            <key>key</key>             <string>gesturesInversed</string>
-            <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
+        <key>title</key>                   <string>MCCustomizer</string>
+        <key>entry</key>                   <dict>
+        <key>cell</key>                    <string>PSLinkCell</string>
+        <key>icon</key>                    <string>MCCustomizer.png</string>
+        <key>label</key>                   <string>MCCustomizer</string>
         </dict>
-
-     <dict>
-         <key>cell</key>                <string>PSGroupCell</string>
-     </dict>
-
-     <dict>
-         <key>cell</key>                <string>PSLinkCell</string>
-         <key>label</key>               <string>Lockscreen</string>
-         <key>detail</key>              <string>MCCustomizerLockscreenController</string>
-     </dict>
-
-     <dict>
-         <key>cell</key>                <string>PSLinkCell</string>
-         <key>label</key>               <string>Control Center</string>
-         <key>detail</key>              <string>MCCustomizerControlCenterController</string>
-     </dict>
-
-     <dict>
-         <key>cell</key>                <string>PSGroupCell</string>
-         <key>footerText</key>          <string>© 2014 Akylas</string>
-     </dict>
-     <dict>
-         <key>cell</key>                <string>PSButtonCell</string>
-         <key>action</key>              <string>donate</string>
-         <key>label</key>               <string>Donate</string>
-     </dict>
-     <dict>
-         <key>cell</key>                <string>PSButtonCell</string>
-         <key>action</key>              <string>twitter</string>
-         <key>label</key>               <string>Developed by @farfromrefuge</string>
-     </dict>
- </array>
-</dict>
-</plist>
+        <key>items</key>                   <array>
+            <dict>
+        <key>cell</key>                    <string>PSGroupCell</string>
+        <key>headerCellClass</key>         <string>BannerCell</string>
+            </dict>
+            <dict>
+        <key>cell</key>                    <string>PSSwitchCell</string>
+        <key>default</key>                 <true/>
+        <key>defaults</key>                <string>com.akylas.mccustomizer</string>
+        <key>label</key>                   <string>Enabled</string>
+        <key>key</key>                     <string>TweakEnabled</string>
+        <key>PostNotification</key>        <string>com.akylas.mccustomizer.preferences-changed</string>
+            </dict>
+            <dict>
+        <key>cell</key>                    <string>PSLinkCell</string>
+        <key>bundle</key>                  <string>AppList</string>
+        <key>isController</key>            <string>1</string>
+        <key>label</key>                   <string>Default Music Application</string>
+        <key>ALSettingsPath</key>          <string>/var/mobile/Library/Preferences/com.akylas.mccustomizer.plist</string>
+        <key>ALChangeNotification</key>    <string>com.akylas.mccustomizer.preferences-changed</string>
+        <key>ALSettingsKey</key>           <string>DefaultApp</string>
+        <key>ALSingleEnabledMode</key>     <true/>
+            </dict>
             <dict>
         <key>cell</key>                    <string>PSSwitchCell</string>
         <key>default</key>                 <false/>
@@ -82,3 +41,45 @@
         <key>key</key>                     <string>alwaysUseDefaultApp</string>
         <key>PostNotification</key>        <string>com.akylas.mccustomizer.preferences-changed</string>
             </dict>
+            <dict>
+        <key>cell</key>                    <string>PSSwitchCell</string>
+        <key>default</key>                 <false/>
+        <key>defaults</key>                <string>com.akylas.mccustomizer</string>
+        <key>label</key>                   <string>Gestures direction inversed</string>
+        <key>key</key>                     <string>gesturesInversed</string>
+        <key>PostNotification</key>        <string>com.akylas.mccustomizer.preferences-changed</string>
+            </dict>
+            <dict>
+        <key>cell</key>                    <string>PSGroupCell</string>
+            </dict>
+            <dict>
+        <key>cell</key>                    <string>PSLinkCell</string>
+        <key>label</key>                   <string>Lockscreen</string>
+        <key>detail</key>                  <string>MCCustomizerLockscreenController</string>
+            </dict>
+            <dict>
+        <key>cell</key>                    <string>PSLinkCell</string>
+        <key>label</key>                   <string>Control Center</string>
+        <key>detail</key>                  <string>MCCustomizerControlCenterController</string>
+            </dict>
+            <dict>
+        <key>cell</key>                    <string>PSGroupCell</string>
+        <key>footerText</key>              <string>© 2014 Akylas</string>
+            </dict>
+            <dict>
+        <key>cell</key>                    <string>PSButtonCell</string>
+        <key>action</key>                  <string>donate</string>
+        <key>label</key>                   <string>Donate</string>
+            </dict>
+            <dict>
+        <key>cell</key>                    <string>PSButtonCell</string>
+        <key>action</key>                  <string>twitter</string>
+        <key>label</key>                   <string>Developed by @farfromrefuge</string>
+            </dict>
+            <dict>
+        <key>cell</key>                    <string>PSButtonCell</string>
+        <key>label</key>                   <string>Design by ▲RTX</string>
+            </dict>
+        </array>
+    </dict>
+</plist>

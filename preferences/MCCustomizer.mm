@@ -1,4 +1,14 @@
 #import <Preferences/Preferences.h>
+#define TAG @"MCCustomizer"
+#define Log(x, ...) NSLog(@"[%@] " x, TAG, ##__VA_ARGS__)
+
+static NSBundle* getBundle() {
+    return [NSBundle bundleWithPath:@"/Library/PreferenceBundles/MCCustomizer.bundle"];
+}
+
+@interface PSTableCell()
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier specifier:(PSSpecifier *)specifier;
+@end
 
 @interface MCCustomizerListController: PSListController {
 }
@@ -56,6 +66,30 @@
         _specifiers = [[self loadSpecifiersFromPlistName:@"ControlCenter" target:self] retain];
     }
     return _specifiers;
+}
+@end
+
+@interface BannerCell : PSTableCell {
+    UIImageView *_imageView;
+}
+@end
+ 
+@implementation BannerCell
+- (id)initWithSpecifier:(PSSpecifier *)specifier
+{
+        self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"headerCell" specifier:specifier];
+        if (self) {
+            _imageView = [[UIImageView alloc] initWithImage:[UIImage imageWithContentsOfFile:[getBundle() pathForResource:@"banner" ofType:@"png"]]];
+            [self addSubview:_imageView];
+            [_imageView release];
+        }
+        return self;
+}
+ 
+- (CGFloat)preferredHeightForWidth:(CGFloat)arg1
+{
+    // Return a custom cell height.
+    return 100.0f;
 }
 @end
 
