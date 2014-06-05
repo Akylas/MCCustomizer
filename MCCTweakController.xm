@@ -154,13 +154,13 @@
         view.hidden = YES;
         return;
     }
+    view.hidden = !_playing;
 
     // in both cases "lockscreen" and "controlcenter" we need to be fullscreen
     
     if (view.superview != toParent || [[toParent subviews] indexOfObject:view] != index)
     {
         view.frame = [UIScreen mainScreen].bounds;
-        view.hidden = !_playing;
         [view removeFromSuperview];
         [toParent insertSubview:view atIndex:index];
     }
