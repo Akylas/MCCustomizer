@@ -299,13 +299,12 @@
 - (void)applySettings:(NSDictionary *)settings {
 
     _didLoadSettings = YES;
-    [_settings enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop){
+    [settings enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop){
         id newValue = [settings objectForKey:key];
         if (newValue) {
             [_settings setValue:newValue forKey:key];
         }
     }]; 
-    // Log(@"applySettings %@", _settings);
 }
 
 @end
