@@ -18,6 +18,7 @@
 -(void)_layoutMediaControlsView
 {
     %orig;
+    if (!(SHOULD_HOOK() && BOOL_PROP(lsCustomLayout)))  return;
     float height = getMediaControlsHeight(YES);
     UIView* view = MSHookIvar<UIView*>(self, "_mediaControlsContainerView");
     CGRect frame = view.frame;
