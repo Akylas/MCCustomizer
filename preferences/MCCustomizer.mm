@@ -1,10 +1,11 @@
-#import <Preferences/Preferences.h>
+#import <Preferences/PSTableCell.h>
+#import "Preferences/PSListController.h"
+#import "MCCActionListViewController.h"
+#import <libactivator/libactivator.h>
+#import "../Utils.h"
 #define TAG @"MCCustomizer"
 #define Log(x, ...) NSLog(@"[%@] " x, TAG, ##__VA_ARGS__)
 
-static NSBundle* getBundle() {
-    return [NSBundle bundleWithPath:@"/Library/PreferenceBundles/MCCustomizer.bundle"];
-}
 
 @interface PSTableCell()
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier specifier:(PSSpecifier *)specifier;
@@ -20,10 +21,42 @@ static NSBundle* getBundle() {
 }
 @end
 
+@interface MCCustomizerLSActionListViewController: MCCActionListViewController {
+}
+@end
+
+@interface MCCustomizerCCActionListViewController: MCCActionListViewController {
+}
+@end
+
+@implementation MCCustomizerLSActionListViewController
+- (instancetype)init {
+    self = [super init];
+    
+    if (self) {
+        self.prefPrefix = @"ls";
+    }
+    
+    return self;
+}
+@end
+
+@implementation MCCustomizerCCActionListViewController
+- (instancetype)init {
+    self = [super init];
+    
+    if (self) {
+        self.prefPrefix = @"cc";
+    }
+    
+    return self;
+}
+@end
+
 @implementation MCCustomizerListController
 - (id)specifiers {
 	if(_specifiers == nil) {
-		_specifiers = [[self loadSpecifiersFromPlistName:@"MCCustomizer" target:self] retain];
+		_specifiers = [self loadSpecifiersFromPlistName:@"MCCustomizer" target:self];
 	}
 	return _specifiers;
 }
@@ -33,10 +66,8 @@ static NSBundle* getBundle() {
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=7KMVX7A7XCN4G"]];
 }
 
-- (void)twitter {
-
-    NSString * _user = @"farfromrefuge";
-
+- (void)twitter:(PSSpecifier *)specifier {
+    NSString *_user = [specifier.properties objectForKey:@"twitterId"];
     if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"tweetbot:"]]) {
         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[@"tweetbot:///user_profile/" stringByAppendingString:_user]]];
     } else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"twitterrific:"]]) {
@@ -54,7 +85,7 @@ static NSBundle* getBundle() {
 @implementation MCCustomizerLockscreenController
 - (id)specifiers {
     if(_specifiers == nil) {
-        _specifiers = [[self loadSpecifiersFromPlistName:@"Lockscreen" target:self] retain];
+        _specifiers = [self loadSpecifiersFromPlistName:@"Lockscreen" target:self];
     }
     return _specifiers;
 }
@@ -63,7 +94,7 @@ static NSBundle* getBundle() {
 @implementation MCCustomizerControlCenterController
 - (id)specifiers {
     if(_specifiers == nil) {
-        _specifiers = [[self loadSpecifiersFromPlistName:@"ControlCenter" target:self] retain];
+        _specifiers = [self loadSpecifiersFromPlistName:@"ControlCenter" target:self];
     }
     return _specifiers;
 }
@@ -79,9 +110,8 @@ static NSBundle* getBundle() {
 {
         self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"headerCell" specifier:specifier];
         if (self) {
-            _imageView = [[UIImageView alloc] initWithImage:[UIImage imageWithContentsOfFile:[getBundle() pathForResource:@"banner" ofType:@"png"]]];
+            _imageView = [[UIImageView alloc] initWithImage:getBundleImage(@"banner")];
             [self addSubview:_imageView];
-            [_imageView release];
         }
         return self;
 }

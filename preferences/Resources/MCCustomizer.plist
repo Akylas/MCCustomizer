@@ -73,12 +73,15 @@
             </dict>
             <dict>
         <key>cell</key>                    <string>PSButtonCell</string>
-        <key>action</key>                  <string>twitter</string>
-        <key>label</key>                   <string>Developed by @farfromrefuge</string>
+        <key>action</key>                  <string>twitter:</string>
+        <key>twitterId</key>               <string>farfromrefuge</string>
+        <key>label</key>                   <string>Developed by farfromrefuge</string>
             </dict>
             <dict>
         <key>cell</key>                    <string>PSButtonCell</string>
+        <key>action</key>                  <string>twitter:</string>
         <key>label</key>                   <string>Design by ▲RTX</string>
+        <key>twitterId</key>               <string>A_RTX</string>
             </dict>
         </array>
     </dict>

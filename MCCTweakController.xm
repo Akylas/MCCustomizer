@@ -98,6 +98,8 @@
         @"lsHideDefaultArtwork":@(NO),
         @"ccShowAirplay":@(NO),
         @"lsShowAirplay":@(NO),
+        @"ccShowMenuButton":@(NO),
+        @"lsShowMenuButton":@(NO),
         @"DefaultApp":@"com.apple.Music",
         @"alwaysUseDefaultApp":@(NO),
     }];

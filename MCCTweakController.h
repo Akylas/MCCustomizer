@@ -32,5 +32,6 @@
 #define STRING_PROP(val) [MCCTweakController getProp:[NSString stringWithUTF8String:#val]]
 #define FLOAT_PROP(val) [[MCCTweakController getProp:[NSString stringWithUTF8String:#val]] floatValue]
 #define SHOULD_HOOK() BOOL_PROP(TweakEnabled)
-
 @end
+
+

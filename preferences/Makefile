@@ -4,10 +4,12 @@ TARGET = iphone:clang:latest:7.0
 include theos/makefiles/common.mk
 
 BUNDLE_NAME = MCCustomizer
-MCCustomizer_FILES = MCCustomizer.mm
+MCCustomizer_CFLAGS = -fobjc-arc -Wno-unused-function -Wno-parentheses
+MCCustomizer_FILES = EventActivator.mm MCCActionListViewController.mm MCCustomizer.mm
 MCCustomizer_INSTALL_PATH = /Library/PreferenceBundles
 MCCustomizer_FRAMEWORKS = UIKit CoreGraphics
 MCCustomizer_PRIVATE_FRAMEWORKS = Preferences
+MCCustomizer_LIBRARIES = activator
 
 include $(THEOS_MAKE_PATH)/bundle.mk
 

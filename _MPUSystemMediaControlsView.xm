@@ -3,6 +3,7 @@
 #import "MCCTweakController.h"
 #import <objc/runtime.h>
 #import <MediaPlayer/MPVolumeView.h>
+#import "Utils.h"
 
 @interface MPVolumeView()
 @property(nonatomic) BOOL showsVolumeSlider;
@@ -11,6 +12,7 @@
 // static char const * const IsCCSectionKey = "IsCCSection";
 static char const * const FirstLayoutKey = "FirstLayout";
 static char const * const AirPlayButtonKey = "AirPlayButton";
+static char const * const MenuButtonKey = "MenuButton";
 
 #define volumeViewHeight 49.000000
 #define timeInformationViewHeight 34.000000
@@ -99,6 +101,13 @@ static CGRect originalVolumeViewFrame;
 - (void)setAirplayButton:(MPVolumeView*)value {
     objc_setAssociatedObject(self, AirPlayButtonKey, value, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
+
+- (UIButton*)menuButton {
+    return objc_getAssociatedObject(self, MenuButtonKey);
+}
+- (void)setMenuButton:(UIButton*)value {
+    objc_setAssociatedObject(self, MenuButtonKey, value, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
 @end
 
 %hook _MPUSystemMediaControlsView
@@ -112,7 +121,8 @@ static CGRect originalVolumeViewFrame;
 %new
 -(void)afterLayoutSubviews
 {
-    MPVolumeView* volumeView = [self airplayButton];
+    MPVolumeView* airPlayButton = [self airplayButton];
+    UIButton* menuButton = [self menuButton];
     if (![self shouldLayout]) {
         if (![self firstLayout]) {
             [self.volumeView setHidden:NO];
@@ -123,7 +133,8 @@ static CGRect originalVolumeViewFrame;
             self.transportControlsView.frame = originalTransportControlsViewFrame;
             self.timeInformationView.frame = originalTimeInformationViewFrame;
             self.volumeView.frame = originalVolumeViewFrame;
-            [volumeView setHidden:YES];
+            [airPlayButton setHidden:YES];
+            [menuButton setHidden:YES];
             self.firstLayout = YES;
         }
         return;
@@ -135,7 +146,7 @@ static CGRect originalVolumeViewFrame;
         originalVolumeViewFrame = self.volumeView.frame;
         self.firstLayout = NO;
     }
-    BOOL hideVolume, hideInfo, hideTime, hideButtons, hideAirPlay;
+    BOOL hideVolume, hideInfo, hideTime, hideButtons, hideAirPlay, hideMenuButton;
     BOOL isCCControl = [self isCCSection];
     MPUNowPlayingTitlesView* trackInformationView = ((MPUNowPlayingTitlesView*)self.trackInformationView);
 
@@ -153,13 +164,18 @@ static CGRect originalVolumeViewFrame;
         hideTime = !BOOL_PROP(ccShowTime);
         hideButtons = !BOOL_PROP(ccShowButtons);
         hideAirPlay = !BOOL_PROP(ccShowAirplay);
+        hideMenuButton = !BOOL_PROP(ccShowMenuButton);
     } else {
         hideVolume = !BOOL_PROP(lsShowVolume);
         hideInfo = !BOOL_PROP(lsShowInfo);
         hideTime = !BOOL_PROP(lsShowTime);
         hideButtons = !BOOL_PROP(lsShowButtons);
         hideAirPlay = !BOOL_PROP(lsShowAirplay);
+        hideMenuButton = !BOOL_PROP(lsShowMenuButton);
     }
+    hideMenuButton |= !menuButton || (hideInfo && hideButtons);
+    hideAirPlay |= !airPlayButton || (hideInfo && hideButtons);
+
     [self.volumeView setHidden:hideVolume];
     [self.timeInformationView setHidden:hideTime];
     [self.trackInformationView setHidden:hideInfo];
@@ -196,35 +212,36 @@ static CGRect originalVolumeViewFrame;
         frame.size.height = volumeViewHeight;
         self.volumeView.frame = frame;
     }
-    if (!hideAirPlay && volumeView) {
-        [volumeView sizeToFit];
-        BOOL airplayHidden = NO;
-        CGRect airplayFrame = volumeView.frame;
-        CGFloat width = airplayFrame.size.width + 2; //for a little right padding
-        CGFloat height = airplayFrame.size.height;
+
+
+    if (!hideAirPlay || !hideMenuButton) {
+        [airPlayButton sizeToFit];
+        CGRect menuButtonFrame = menuButton.frame;
+        menuButtonFrame.origin.x = 2;
+        CGRect airplayFrame = airPlayButton.frame;
+        CGFloat aWidth = airplayFrame.size.width + 2; //for a little right padding
+        CGFloat aHeight = airplayFrame.size.height;
         CGRect myFrame = self.bounds;
         if (!hideButtons) {
             CGRect buttonsFrame = self.transportControlsView.frame;
-            airplayFrame.origin.x = CGRectGetMaxX(myFrame) - width;
-            airplayFrame.origin.y = CGRectGetMidY(buttonsFrame) - height/2.0f + 10.0f; //why is not centered without the 5?
+            airplayFrame.origin.x = CGRectGetMaxX(myFrame) - aWidth;
+            airplayFrame.origin.y = CGRectGetMidY(buttonsFrame) - aHeight/2.0f + 10.0f; //why is not centered ?
+            menuButtonFrame.origin.y = CGRectGetMidY(buttonsFrame) - menuButtonFrame.size.height/2.0f + 10.0f; //why is not centered?
         }
         else if (!hideInfo) {
             CGRect infoFrame = self.trackInformationView.frame;
-            airplayFrame.origin.x = CGRectGetMaxX(myFrame) - width;
-            airplayFrame.origin.y = CGRectGetMidY(infoFrame) - height/2.0f;
-            infoFrame.size.width -= 2*width;
-            infoFrame.origin.x = width;
+            airplayFrame.origin.x = CGRectGetMaxX(myFrame) - aWidth;
+            airplayFrame.origin.y = CGRectGetMidY(infoFrame) - aHeight/2.0f;
+            menuButtonFrame.origin.y = CGRectGetMidY(infoFrame) - menuButtonFrame.size.height/2.0f;
+            infoFrame.origin.x = aWidth;
+            infoFrame.size.width -= 2*aWidth;
             self.trackInformationView.frame = infoFrame;
         }
-        else {
-            airplayHidden = YES;
-        }
-        volumeView.hidden = airplayHidden;        
-        volumeView.frame = airplayFrame;
+        airPlayButton.frame = airplayFrame;
+        menuButton.frame = menuButtonFrame;
     }
-    else {
-        [volumeView setHidden:YES];    
-    }
+    [airPlayButton setHidden:hideAirPlay];    
+    [menuButton setHidden:hideMenuButton];  
 }
 
 // -(void)setFrame:(CGRect)frame {
@@ -259,7 +276,6 @@ static CGRect originalVolumeViewFrame;
 
 - (void)layoutSubviews {
     %orig;
-    Log(@"layoutSubviews");
     [self afterLayoutSubviews];
 }
 
@@ -284,12 +300,54 @@ static CGRect originalVolumeViewFrame;
 
     MPVolumeView *volumeView = [[MPVolumeView alloc] init];
     [volumeView setShowsVolumeSlider:NO];
-    [volumeView setHidden:!SHOULD_HOOK()];
+    [volumeView setHidden:![self shouldLayout]];
     [volumeView sizeToFit];
     [view addSubview:volumeView];
     [self setAirplayButton:volumeView];
+
+    UIButton *menuButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    menuButton.userInteractionEnabled = YES;
+    [menuButton setFrame:CGRectMake(0.0,0.0, 29.0, 29.0)];
+    menuButton.showsTouchWhenHighlighted = YES;
+    [menuButton setImage:getBundleImage(@"menu") forState:UIControlStateNormal];
+    [menuButton addTarget:self action:@selector(menuButtonAction) forControlEvents:UIControlEventTouchUpInside];
+    [view addSubview:menuButton];
+    [self setMenuButton:menuButton];
     return view;
 }
+
+%new
+-(void)menuButtonAction
+{
+    if (!SHOULD_HOOK()) return;
+    BOOL isCCControl = [self isCCSection];
+
+    NSOrderedSet * actions = [NSOrderedSet orderedSetWithArray:[MCCTweakController getProp:isCCControl?@"ccEnabledSections":@"lsEnabledSections"]];
+    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:((id<UIActionSheetDelegate>)self) cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil];
+    for( NSString *ID in actions)  {
+        LAEvent *event = [[LAEvent alloc] initWithName:ID];
+        NSString* listenerName = [LASharedActivator assignedListenerNameForEvent:event];
+        NSArray* listeners = [listenerName componentsSeparatedByString:@";"];
+        if ([listeners count] > 0) {
+            [actionSheet addButtonWithTitle:getActivatorDisplayName(listeners)]; 
+            [[[actionSheet valueForKey:@"_buttons"] lastObject] setImage:getActivatorEventImage(listeners) forState:UIControlStateNormal];
+        }
+    }
+    actionSheet.cancelButtonIndex = [actionSheet addButtonWithTitle:@"Cancel"];
+    [actionSheet showInView:self];
+}
+
+%new
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (buttonIndex == actionSheet.cancelButtonIndex) return;
+    BOOL isCCControl = [self isCCSection];
+    NSOrderedSet * actions = [NSOrderedSet orderedSetWithArray:[MCCTweakController getProp:isCCControl?@"ccEnabledSections":@"lsEnabledSections"]];
+    NSString* ID = [actions objectAtIndex:buttonIndex];
+    LAEvent *event = [[LAEvent alloc] initWithName:ID];
+    [LASharedActivator sendEventToListener:event];
+}
+
 
 %new
 -(BOOL)gesturesEnabled 

@@ -5,7 +5,6 @@ static void reloadSettings() {
 
     //  Load settings plist
     NSDictionary * settings = [NSDictionary dictionaryWithContentsOfFile:PREFERENCES_PATH];
-
     if (!settings)
         return;
 
@@ -22,7 +21,7 @@ static void reloadSettingsNotification(CFNotificationCenterRef notificationCente
 %ctor {
 
     @autoreleasepool {
-
+        dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
         dlopen("/System/Library/SpringBoardPlugins/NowPlayingArtLockScreen.lockbundle/NowPlayingArtLockScreen", 2);
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)reloadSettingsNotification, CFSTR(PREFERENCES_CHANGED_NOTIFICATION), NULL, CFNotificationSuspensionBehaviorCoalesce);
 

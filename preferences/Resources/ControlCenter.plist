@@ -111,6 +111,15 @@
         </dict>
 
         <dict>
+            <key>cell</key>            <string>PSSwitchCell</string>
+            <key>default</key>         <false/>
+            <key>defaults</key>        <string>com.akylas.mccustomizer</string>
+            <key>label</key>           <string>Action button</string>
+            <key>key</key>             <string>ccShowMenuButton</string>
+            <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
+        </dict>
+
+        <dict>
             <key>cell</key>            <string>PSGroupCell</string>
             <key>label</key>           <string>Gestures</string>
         </dict>
@@ -138,6 +147,17 @@
             <key>key</key>             <string>ccOneTapToOpenNoMusic</string>
             <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
         </dict>
+
+        <dict>
+            <key>cell</key>            <string>PSGroupCell</string>
+            <key>label</key>           <string>Actions</string>
+        </dict>
+        <dict>
+            <key>cell</key>            <string>PSLinkCell</string>
+            <key>label</key>           <string>Actions</string>
+            <key>detail</key>          <string>MCCustomizerCCActionListViewController</string>
+        </dict>
+
 
     </array>
     <key>title</key>           <string>Control Center</string>
