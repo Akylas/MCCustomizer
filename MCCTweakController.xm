@@ -73,6 +73,8 @@
         @"TweakEnabled":@(YES),
         @"ccArtworkEnabled":@(YES),
         @"lsArtworkEnabled":@(YES),
+        @"ccCustomLayout":@(YES),
+        @"lsCustomLayout":@(YES),
         @"lsShowVolume":@(YES),
         @"lsShowTime":@(YES),
         @"lsShowButtons":@(YES),

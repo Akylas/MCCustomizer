@@ -61,6 +61,14 @@
             <key>cell</key>            <string>PSSwitchCell</string>
             <key>default</key>         <true/>
             <key>defaults</key>        <string>com.akylas.mccustomizer</string>
+            <key>label</key>           <string>CustomLayout</string>
+            <key>key</key>             <string>ccCustomLayout</string>
+            <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>
+        </dict>
+        <dict>
+            <key>cell</key>            <string>PSSwitchCell</string>
+            <key>default</key>         <true/>
+            <key>defaults</key>        <string>com.akylas.mccustomizer</string>
             <key>label</key>           <string>Progressbar</string>
             <key>key</key>             <string>ccShowTime</string>
             <key>PostNotification</key><string>com.akylas.mccustomizer.preferences-changed</string>

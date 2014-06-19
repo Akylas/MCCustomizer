@@ -42,7 +42,7 @@
     BOOL current = [[self artworkView] isHidden];
     BOOL newHidden  = BOOL_PROP(lsHideDefaultArtwork);
     if (current != newHidden) {
-    [[self artworkView] setHidden:newHidden];
+        [[self artworkView] setHidden:newHidden];
     }
 }
 %end

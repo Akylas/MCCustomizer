@@ -348,3 +348,7 @@
 - (SBControlCenterViewController*)viewController;
 -(void)dismissAnimated:(BOOL)arg1 ;
 @end
+
+@interface SBCCMediaControlsSectionController
+-(void)systemMediaControlsViewController:(id)controller didReceiveTapOnControlType:(int)type;
+@end

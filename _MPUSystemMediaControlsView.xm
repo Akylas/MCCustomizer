@@ -70,6 +70,7 @@ static CGRect originalVolumeViewFrame;
 -(BOOL)gesturesInversed ;
 -(void)afterLayoutSubviews;
 -(float)getMediaControlsHeight;
+-(BOOL)shouldLayout;
 @end
 
 @implementation _MPUSystemMediaControlsView (Additions)
@@ -102,11 +103,17 @@ static CGRect originalVolumeViewFrame;
 
 %hook _MPUSystemMediaControlsView
 
+%new 
+-(BOOL)shouldLayout{
+    BOOL isCCControl = [self isCCSection];
+    return SHOULD_HOOK() && isCCControl?BOOL_PROP(ccCustomLayout):BOOL_PROP(lsCustomLayout);
+}
+
 %new
 -(void)afterLayoutSubviews
 {
     MPVolumeView* volumeView = [self airplayButton];
-    if (!SHOULD_HOOK()) {
+    if (![self shouldLayout]) {
         if (![self firstLayout]) {
             [self.volumeView setHidden:NO];
             [self.timeInformationView setHidden:NO];

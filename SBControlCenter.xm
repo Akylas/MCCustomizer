@@ -22,9 +22,8 @@
 - (struct CGSize)contentSizeForOrientation:(long long)arg1
 {
     CGSize result = %orig;
-    if (!SHOULD_HOOK()) return result;
+    if (!(SHOULD_HOOK() && BOOL_PROP(ccCustomLayout)))  return result;
     result.height = getMediaControlsHeight(NO);
-    // Log (@"contentSizeForOrientation %@", NSStringFromCGSize(result));
     return result;
 }
 
