@@ -1,9 +1,11 @@
+#import <CommonCrypto/CommonDigest.h>
 #import "MCCTweakController.h"
 #import "PrivateHeaders.h"
 #import <libactivator/libactivator.h>
 #import "UIAlertView+Blocks.h"
 
 #define MAX_COVER_TEST 1
+#define SPOTIFY_DEFAULT_COVER_MD5 @"678514434ad5b105fa6f12148daeca8c"
 
 
 
@@ -44,6 +46,7 @@ static CGPoint lastTapCentroid;
     UIActionSheet *_actionSheet;
     UIWindow *_alertWindow;
     NSTimer* _sleepTimer;
+    NSString* _currentCoverMD5;
 }
 @synthesize nowPlayingImage = _nowPlayingImage;
 
@@ -397,11 +400,28 @@ return self;
 }
 
 - (void)setNowPlayingImage:(UIImage *)image {
-    [NSObject cancelPreviousPerformRequestsWithTarget:self];
+    [NSObject cancelPreviousPerformRequestsWithTarget:self
+       selector:@selector(setNowPlayingImage:)
+       object:nil];
     _coverArtShouldChange = NO;
+    if (!image) {
+        _currentCoverMD5 = nil;
+    }
     _nowPlayingImage = image;
     [self setNowPlayingImage:image forArtworkView:_ccArtworkView enabled:BOOL_PROP(ccArtworkEnabled)];
     [self setNowPlayingImage:image forArtworkView:_lsArtworkView enabled:BOOL_PROP(lsArtworkEnabled)];
+}
+
+-(NSString*)dataMD5:(NSData*) data {
+    unsigned char result[CC_MD5_DIGEST_LENGTH];
+    CC_MD5( data.bytes, data.length, result ); // This is the md5 call
+    return [NSString stringWithFormat:
+        @"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
+        result[0], result[1], result[2], result[3], 
+        result[4], result[5], result[6], result[7],
+        result[8], result[9], result[10], result[11],
+        result[12], result[13], result[14], result[15]
+        ];  
 }
 
 - (void)dataProviderDidLoad
@@ -425,32 +445,52 @@ return self;
         hasChanges = YES;
     }
     if (hasChanges) {
-        // Log(@"dataProviderDidLoad hasChanges");
-     NSDictionary* info = [mc _nowPlayingInfo];
-
-     NSData *data = [info objectForKey:@"artworkData"];
-     if (data) {
-        UIImage *image = [[UIImage alloc] initWithData:data];
-        self.nowPlayingImage = image;
-    } else {
-        _coverArtShouldChange = YES;
-        _coverArtTestCount = 0;
-        [self performSelector:@selector(setNowPlayingImage:) withObject:nil afterDelay:2.0f];
+        NSData *coverData = [[mc _nowPlayingInfo] objectForKey:@"artworkData"];
+        if (coverData) {
+            NSString* md5 = [self dataMD5:coverData];
+            if (![md5 isEqualToString:_currentCoverMD5]) {
+                if (![md5 isEqualToString:SPOTIFY_DEFAULT_COVER_MD5]) {
+                    _currentCoverMD5 = md5;
+                    self.nowPlayingImage =  [[UIImage alloc] initWithData:coverData];            
+                }
+                else {
+                    _coverArtShouldChange = YES;
+                    _coverArtTestCount = 0;
+                    [self performSelector:@selector(setNowPlayingImage:) withObject:nil afterDelay:2.0f];
+                }
+            }
+        } else if (!coverData) {
+            _coverArtShouldChange = YES;
+            _coverArtTestCount = 0;
+            [self performSelector:@selector(setNowPlayingImage:) withObject:nil afterDelay:2.0f];
+        }
+    } else if (_coverArtShouldChange) {
+        NSData *coverData = [[mc _nowPlayingInfo] objectForKey:@"artworkData"];
+        if (coverData) {
+            NSString* md5 = [self dataMD5:coverData];
+            if (![md5 isEqualToString:_currentCoverMD5]) {
+                if (![md5 isEqualToString:SPOTIFY_DEFAULT_COVER_MD5]) {
+                    _currentCoverMD5 = md5;
+                    self.nowPlayingImage =  [[UIImage alloc] initWithData:coverData];            
+                }
+                else {
+                    if (_coverArtTestCount < MAX_COVER_TEST) {
+                        _coverArtTestCount++;
+                        [self performSelector:@selector(setNowPlayingImage:) withObject:nil afterDelay:1.0f];
+                    }
+                    else {
+                        self.nowPlayingImage = nil;
+                    }
+                }
+            }
+        } else if (_coverArtTestCount < MAX_COVER_TEST) {
+            _coverArtTestCount++;
+            [self performSelector:@selector(setNowPlayingImage:) withObject:nil afterDelay:1.0f];
+        }
+        else {
+            self.nowPlayingImage = nil;
+        }
     }
-} else if (_coverArtShouldChange) {
-    NSData *data = [[mc _nowPlayingInfo] objectForKey:@"artworkData"];
-    if (data) {
-        UIImage *image = [[UIImage alloc] initWithData:data];
-        self.nowPlayingImage = image;
-    }
-    else if (_coverArtTestCount < MAX_COVER_TEST) {
-        _coverArtTestCount++;
-        [self performSelector:@selector(setNowPlayingImage:) withObject:nil afterDelay:1.0f];
-    }
-    else {
-        self.nowPlayingImage = nil;
-    }
-}
 }
 
 - (void)playbackStateChanged:(BOOL)playing
