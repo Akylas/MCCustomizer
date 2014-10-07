@@ -1,0 +1,5 @@
+{
+    group = "Music Control Customizer";
+    title = "Sleep Timer Event";
+    description = "fired when the sleep timer finishes";
+}

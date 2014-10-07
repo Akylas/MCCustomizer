@@ -1,0 +1,6 @@
+{
+    group = "Music Control Customizer";
+    title = "Toggle repeat";
+    description = "Current Player: Toggle repeat";
+    "compatible-modes" = ("springboard", "application", "lockscreen");
+}

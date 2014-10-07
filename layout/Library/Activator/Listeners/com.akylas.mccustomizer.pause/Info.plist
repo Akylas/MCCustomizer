@@ -1,0 +1,6 @@
+{
+    group = "Music Control Customizer";
+    title = "Pause";
+    description = "Current Player: Pause";
+    "compatible-modes" = ("springboard", "application", "lockscreen");
+}

@@ -1,0 +1,6 @@
+{
+    group = "Music Control Customizer";
+    title = "Play";
+    description = "Current Player: Play";
+    "compatible-modes" = ("springboard", "application", "lockscreen");
+}
