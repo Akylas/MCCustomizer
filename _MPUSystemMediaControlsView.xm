@@ -152,6 +152,9 @@ static CGRect originalVolumeViewFrame;
 
     if (trackInformationView.titleText == nil) {
         [trackInformationView setTitleText:isCCControl?STRING_PROP(ccNoPlayingText):STRING_PROP(lsNoPlayingText)];
+    }
+
+    if (trackInformationView.artistText == nil || trackInformationView.artistText == [NSNull null]) {
         BOOL oneTapToOpen = (isCCControl && BOOL_PROP(ccOneTapToOpenNoMusic)) || (!isCCControl && BOOL_PROP(lsOneTapToOpenNoMusic));
         SBApplication* app = [[%c(SBApplicationController) sharedInstance] applicationWithDisplayIdentifier:STRING_PROP(DefaultApp)];  
         [trackInformationView setArtistText:[NSString stringWithFormat:oneTapToOpen?@"Tap to open %@":@"Long press to open %@", [app displayName]]];
@@ -373,14 +376,16 @@ static CGRect originalVolumeViewFrame;
 -(void)handleSwipeLeftGesture:(UISwipeGestureRecognizer*)sender
 {
     if (![self gesturesEnabled]) return;
-    [[%c(SBMediaController) sharedInstance] changeTrack:[self gesturesInversed]?-1:1];
+    // [[%c(SBMediaController) sharedInstance] changeTrack:[self gesturesInversed]?-1:1];
+    [MCCTweakController runAction:[self gesturesInversed]?kMCCActionPreviousTrack:kMCCActionNextTrack];
 }
 
 %new
 -(void)handleSwipeRightGesture:(UISwipeGestureRecognizer*)sender
 {
     if (![self gesturesEnabled]) return;
-    [[%c(SBMediaController) sharedInstance] changeTrack:[self gesturesInversed]?1:-1];
+    [MCCTweakController runAction:[self gesturesInversed]?kMCCActionNextTrack:kMCCActionPreviousTrack];
+   // [[%c(SBMediaController) sharedInstance] changeTrack:[self gesturesInversed]?1:-1];
 }
 
 %new

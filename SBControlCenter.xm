@@ -8,6 +8,26 @@
 {
     return MSHookIvar<SBControlCenterViewController *>(self, "_viewController");
 }
+
+%new
+- (void)updateStatusText:(NSString*)text
+{
+    SBControlCenterGrabberView* grabberView = [self.viewController contentView].grabberView;
+    if ([grabberView respondsToSelector:@selector(presentStatusUpdate:)])
+    {
+        [grabberView presentStatusUpdate:[%c(SBControlCenterStatusUpdate) statusUpdateWithString:text reason:kMCCId]];
+    }
+    else {
+        [grabberView updateStatusText:text reason:kMCCId];
+    }
+}
+
++(void)notifyControlCenterControl:(id)control didActivate:(BOOL)activate 
+{
+    Log(@"notifyControlCenterControl %@", control);
+    %orig;
+}
+
 %end
 
 %hook SBControlCenterViewController
@@ -15,6 +35,11 @@
 -(SBControlCenterContainerView*)containerView
 {
     return MSHookIvar<SBControlCenterContainerView*>(self, "_containerView");
+}
+%new
+-(SBControlCenterContentView*)contentView
+{
+    return MSHookIvar<SBControlCenterContentView*>(self, "_contentView");
 }
 %end
 

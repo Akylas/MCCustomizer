@@ -1,9 +1,23 @@
 #import "MCCTweakController.h"
 #import "PrivateHeaders.h"
-
+#import <libactivator/libactivator.h>
+#import "UIAlertView+Blocks.h"
 
 #define MAX_COVER_TEST 1
 
+
+
+static CGPoint lastTapCentroid;
+%hook SBHandMotionExtractor
+
+- (void)extractHandMotionForActiveTouches:(void *)activeTouches count:(NSUInteger)count centroid:(CGPoint)centroid
+{
+    if (count && !isnan(centroid.x) && !isnan(centroid.y))
+        lastTapCentroid = centroid;
+    %orig;
+}
+
+%end
 
 @implementation MCCTweakController
 {
@@ -24,6 +38,12 @@
     BOOL _coverArtShouldChange;
     BOOL _playing;
     int _coverArtTestCount;
+    NSArray* _supportedActions;
+    NSArray* _timerTimes;
+
+    UIActionSheet *_actionSheet;
+    UIWindow *_alertWindow;
+    NSTimer* _sleepTimer;
 }
 @synthesize nowPlayingImage = _nowPlayingImage;
 
@@ -60,53 +80,229 @@
     self = [super init];
 
     if (self) {
-       _coverArtShouldChange = NO;
-       _playing = NO;
-       _ccArtworkView = [[UIImageView alloc] initWithFrame:CGRectZero];
-       _ccArtworkView.contentMode = UIViewContentModeScaleAspectFill;
-       _ccArtworkViewAlpha = 1.0f;
+        _supportedActions = @[kMCCActionStartTimer,
+            kMCCActionTogglePlayPause,
+            kMCCActionPlay,
+            kMCCActionPause,
+            kMCCActionStop,
+            kMCCActionNextTrack,
+            kMCCActionPreviousTrack,
+            kMCCActionToggleRepeat,
+            kMCCActionToggleShuffle];
+        _timerTimes = @[@(1), @(10), @(20), @(30), @(40), @(50), 
+            @(60), @(70), @(80), @(90), @(100), @(110), 
+            @(120), @(130), @(140), @(150), @(160), @(170), @(180)];
+        id<LAListener> listener = (id<LAListener>)self;
+        for (NSString* key in _supportedActions)
+        {
+            [LASharedActivator registerListener:listener forName:key];
+        }
+        _coverArtShouldChange = NO;
+        _playing = NO;
+        _ccArtworkView = [[UIImageView alloc] initWithFrame:CGRectZero];
+        _ccArtworkView.contentMode = UIViewContentModeScaleAspectFill;
+        _ccArtworkViewAlpha = 1.0f;
 
-       _lsArtworkView = [[UIImageView alloc] initWithFrame:CGRectZero];
-       _lsArtworkView.contentMode = UIViewContentModeScaleAspectFill;
-       _lsArtworkViewAlpha = 1.0f;
-       _settings = [NSMutableDictionary dictionaryWithDictionary:@{
-        @"TweakEnabled":@(YES),
-        @"ccArtworkEnabled":@(YES),
-        @"lsArtworkEnabled":@(YES),
-        @"ccCustomLayout":@(YES),
-        @"lsCustomLayout":@(YES),
-        @"lsShowVolume":@(YES),
-        @"lsShowTime":@(YES),
-        @"lsShowButtons":@(YES),
-        @"lsShowInfo":@(YES),
-        @"ccShowVolume":@(YES),
-        @"ccShowTime":@(YES),
-        @"ccShowButtons":@(YES),
-        @"ccShowInfo":@(YES),
-        @"ccGesturesEnabled":@(YES),
-        @"lsGesturesEnabled":@(YES),
-        @"gesturesInversed":@(NO),
-        @"ccNoPlayingText":@"No Music playing",
-        @"lsNoPlayingText":@"No Music playing",
-        @"ccArtworkOpacity":@(1.0),
-        @"lsArtworkOpacity":@(1.0),
-        @"ccArtworkScaleToFit":@(NO),
-        @"lsArtworkScaleToFit":@(NO),
-        @"ccOneTapToOpenNoMusic":@(YES),
-        @"lsOneTapToOpenNoMusic":@(YES),
-        @"ccHideOnPlayPause":@(NO),
-        @"lsHideDefaultArtwork":@(NO),
-        @"ccShowAirplay":@(NO),
-        @"lsShowAirplay":@(NO),
-        @"ccShowMenuButton":@(NO),
-        @"lsShowMenuButton":@(NO),
-        @"DefaultApp":@"com.apple.Music",
-        @"alwaysUseDefaultApp":@(NO),
-    }];
-       _didLoadSettings = NO;
-   }
+        _lsArtworkView = [[UIImageView alloc] initWithFrame:CGRectZero];
+        _lsArtworkView.contentMode = UIViewContentModeScaleAspectFill;
+        _lsArtworkViewAlpha = 1.0f;
+        _settings = [NSMutableDictionary dictionaryWithDictionary:@{
+            @"TweakEnabled":@(YES),
+            @"ccArtworkEnabled":@(YES),
+            @"lsArtworkEnabled":@(YES),
+            @"ccCustomLayout":@(YES),
+            @"lsCustomLayout":@(YES),
+            @"lsShowVolume":@(YES),
+            @"lsShowTime":@(YES),
+            @"lsShowButtons":@(YES),
+            @"lsShowInfo":@(YES),
+            @"ccShowVolume":@(YES),
+            @"ccShowTime":@(YES),
+            @"ccShowButtons":@(YES),
+            @"ccShowInfo":@(YES),
+            @"ccGesturesEnabled":@(YES),
+            @"lsGesturesEnabled":@(YES),
+            @"gesturesInversed":@(NO),
+            @"ccNoPlayingText":@"No Music playing",
+            @"lsNoPlayingText":@"No Music playing",
+            @"ccArtworkOpacity":@(1.0),
+            @"lsArtworkOpacity":@(1.0),
+            @"ccArtworkScaleToFit":@(NO),
+            @"lsArtworkScaleToFit":@(NO),
+            @"ccOneTapToOpenNoMusic":@(YES),
+            @"lsOneTapToOpenNoMusic":@(YES),
+            @"ccHideOnPlayPause":@(NO),
+            @"lsHideDefaultArtwork":@(NO),
+            @"ccShowAirplay":@(NO),
+            @"lsShowAirplay":@(NO),
+            @"ccShowMenuButton":@(NO),
+            @"lsShowMenuButton":@(NO),
+            @"DefaultApp":@"com.apple.Music",
+            @"alwaysUseDefaultApp":@(NO),
+        }];
+_didLoadSettings = NO;
+}
 
-   return self;
+return self;
+}
+
+-(void)updateStatusText:(NSString*)text {
+    SBControlCenterController *ccController = [%c(SBControlCenterController) sharedInstanceIfExists];
+    if (ccController) {
+        [ccController updateStatusText:text];
+    }
+}
+
+-(void)showTimerAlert
+{
+    UIActionSheet *actionSheet = _actionSheet = [[UIActionSheet alloc] init];
+    actionSheet.title = @"Define sleep timer duration";
+    actionSheet.delegate = (id<UIActionSheetDelegate>)self;
+
+    // ObjC Fast Enumeration
+    for (NSNumber *timeInMinutes in _timerTimes) {
+        [actionSheet addButtonWithTitle:[NSString stringWithFormat:@"%@ min", timeInMinutes]];
+    }
+
+    NSInteger cancelButtonIndex = [actionSheet addButtonWithTitle:@"Cancel"];
+
+    if (!_alertWindow) {
+        _alertWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+        _alertWindow.windowLevel = 1050.1f /*UIWindowLevelStatusBar*/;
+    }
+    _alertWindow.hidden = NO;
+    _alertWindow.rootViewController = [[UIViewController alloc] init];
+    if ([_alertWindow respondsToSelector:@selector(_updateToInterfaceOrientation:animated:)])
+        [_alertWindow _updateToInterfaceOrientation:[(SpringBoard*)[NSClassFromString(@"SpringBoard") sharedApplication] _frontMostAppOrientation] animated:NO];
+    if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+        CGRect bounds;
+        if ((lastTapCentroid.x == 0.0f) || (lastTapCentroid.y == 0.0f) || isnan(lastTapCentroid.x) || isnan(lastTapCentroid.y)) {
+            bounds = _alertWindow.rootViewController.view.bounds;
+            bounds.origin.y += bounds.size.height;
+            bounds.size.height = 0.0f;
+        } else {
+            bounds.origin.x = lastTapCentroid.x - 1.0f;
+            bounds.origin.y = lastTapCentroid.y - 1.0f;
+            bounds.size.width = 2.0f;
+            bounds.size.height = 2.0f;
+        }
+        [actionSheet showFromRect:bounds inView:_alertWindow.rootViewController.view animated:YES];
+    } else {
+        actionSheet.cancelButtonIndex = cancelButtonIndex;
+        [actionSheet showInView:_alertWindow.rootViewController.view];
+    }
+}
+
+-(void)runAction:(NSString*)action withObject:(id)object {
+    Log(@"runAction %@", action);
+    NSString* statusText;
+    SBMediaController* controller = [%c(SBMediaController) sharedInstance];
+    if ([action isEqualToString:kMCCActionTogglePlayPause]) {
+        statusText = [controller isPaused]?@"Play":@"Pause";
+        [controller togglePlayPause];
+    } else if ([action isEqualToString:kMCCActionPlay]) {
+        statusText = @"Play";
+        [controller play];
+    } else if ([action isEqualToString:kMCCActionPause]) {
+        statusText = @"Pause";
+        [controller pause];
+    } else if ([action isEqualToString:kMCCActionStop]) {
+        statusText = @"Stop";
+        [controller stop];
+    } else if ([action isEqualToString:kMCCActionNextTrack]) {
+        statusText = @"Next track";
+        [controller changeTrack:1];
+    } else if ([action isEqualToString:kMCCActionPreviousTrack]) {
+        statusText = @"Previous track";
+        [controller changeTrack:-1];
+    } else if ([action isEqualToString:kMCCActionToggleRepeat]) {
+        int repeatMode = [controller repeatMode];
+        statusText = [NSString stringWithFormat:@"Repeat %d", repeatMode];
+        [controller toggleRepeat];
+    } else if ([action isEqualToString:kMCCActionToggleShuffle]) {
+        int shuffleMode = [controller toggleRepeat];
+        statusText = [NSString stringWithFormat:@"Shuffle %d", shuffleMode];
+        [controller toggleShuffle];
+    } else if ([action isEqualToString:kMCCActionStartTimer]) {
+
+        if (_sleepTimer) {
+            [UIAlertView showWithTitle:@"Cancel Sleep Timer?"
+                message:@"There is sleep timer currently set. Do you want to cancel it?"
+                cancelButtonTitle:@"Cancel"
+                otherButtonTitles:@[@"OK"]
+                tapBlock:^(UIAlertView *alertView, NSInteger buttonIndex) {
+                    if (buttonIndex == [alertView cancelButtonIndex]) {
+                    } else {
+                        if (_sleepTimer) {
+                            [_sleepTimer invalidate];
+                            _sleepTimer = nil;
+                            [self updateStatusText:@"Sleep timer cancelled"];
+                        }
+                    }
+                }];
+        }
+        else {
+            [self showTimerAlert];
+        }
+
+        
+    }
+    if (statusText) {
+        [self updateStatusText:statusText];
+    }
+}
+-(void)runAction:(NSString*)action {
+    [self runAction:action withObject:nil];
+}
+
++(void)runAction:(NSString*)action withObject:(id)object {
+    [[MCCTweakController sharedInstance] runAction:action withObject:object];
+}
+
++(void)runAction:(NSString*)action {
+    [[MCCTweakController sharedInstance] runAction:action];
+}
+
+-(void)onSleepTimerDone
+{
+    [_sleepTimer invalidate];
+    _sleepTimer = nil;
+    Log(kMCCEventSleepTimer);
+    LAEvent *event = [[LAEvent alloc] initWithName:kMCCEventSleepTimer];
+    [LASharedActivator sendEventToListener:event];
+}
+
+- (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex
+{
+    if (buttonIndex >= 0 && buttonIndex != actionSheet.cancelButtonIndex && buttonIndex < [_timerTimes count]) {
+        NSNumber* duration = [_timerTimes objectAtIndex:buttonIndex];
+
+        if (_sleepTimer) {
+            [_sleepTimer invalidate];
+            _sleepTimer = nil;
+        }
+        _sleepTimer = [[NSTimer alloc] initWithFireDate:[[NSDate date] dateByAddingTimeInterval:([duration intValue]*60)] interval:0 target:self selector:@selector(onSleepTimerDone) userInfo:nil repeats:NO];
+        [[NSRunLoop currentRunLoop] addTimer:_sleepTimer forMode:NSRunLoopCommonModes];
+        [self updateStatusText:[NSString stringWithFormat:@"Starting sleep timer: %@ min", duration]];
+
+        // NSURL *adjustedURL = _url;
+        // NSString *displayIdentifier = [_orderedDisplayIdentifiers objectAtIndex:buttonIndex];
+        // BCApplySchemeReplacementForDisplayIdentifierOnURL(displayIdentifier, adjustedURL, &adjustedURL);
+        // suppressed++;
+        // if ([UIApp respondsToSelector:@selector(applicationOpenURL:withApplication:sender:publicURLsOnly:animating:needsPermission:additionalActivationFlags:activationHandler:)]) {
+        //     [(SpringBoard *)UIApp applicationOpenURL:adjustedURL publicURLsOnly:NO];
+        // } else if ([UIApp respondsToSelector:@selector(applicationOpenURL:publicURLsOnly:animating:sender:additionalActivationFlag:)]) {
+        //     [(SpringBoard *)UIApp applicationOpenURL:adjustedURL publicURLsOnly:NO animating:YES sender:_sender additionalActivationFlag:_additionalActivationFlag];
+        // } else {
+        //     [(SpringBoard *)UIApp applicationOpenURL:adjustedURL withApplication:nil sender:_sender publicURLsOnly:NO animating:YES needsPermission:NO additionalActivationFlags:nil];
+        // }
+        // suppressed--;
+    }
+    _actionSheet.delegate = nil;
+    _actionSheet = nil;
+    _alertWindow.hidden = YES;
+    _alertWindow.rootViewController = nil;
+    _alertWindow = nil;
 }
 
 +(id)getProp:(NSString*)key{
@@ -307,6 +503,15 @@
             [_settings setValue:newValue forKey:key];
         }
     }]; 
+}
+
+- (void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event forListenerName:(NSString *)listenerName
+{
+    [self runAction:listenerName];
+    event.handled = YES;
+}
+- (BOOL)activator:(LAActivator *)activator requiresNeedsPoweredDisplayForListenerName:(NSString *)listenerName {
+    return [listenerName isEqualToString:kMCCActionStartTimer];
 }
 
 @end

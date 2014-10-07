@@ -336,9 +336,25 @@
 -(SBControlCenterContentContainerView*)contentContainerView;
 @end
 
+@interface SBControlCenterStatusUpdate : NSObject 
++(id)statusUpdateWithString:(id)string reason:(id)reason;
+@end
+
+@interface SBControlCenterGrabberView: UIView
+//not in iOS 7.1
+-(void)updateStatusText:(id)text reason:(id)reason;
+//new
+-(void)presentStatusUpdate:(id)update;
+@end
+
+@interface SBControlCenterContentView: UIView
+-(SBControlCenterGrabberView*)grabberView;
+@end
+
 @interface SBControlCenterViewController : UIViewController
 
 - (SBControlCenterContainerView*)containerView;
+-(SBControlCenterContentView*)contentView;
 @end
 
 @interface SBControlCenterController : UIViewController
@@ -347,8 +363,21 @@
 + (id)sharedInstance;
 - (SBControlCenterViewController*)viewController;
 -(void)dismissAnimated:(BOOL)arg1 ;
+- (void)updateStatusText:(NSString*)text;
 @end
 
 @interface SBCCMediaControlsSectionController
 -(void)systemMediaControlsViewController:(id)controller didReceiveTapOnControlType:(int)type;
+@end
+
+@interface SpringBoard : UIApplication
+
+- (int)_frontMostAppOrientation;
+
+@end
+
+@interface UIWindow ()
+
+-(void)_updateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation animated:(BOOL)animated;
+
 @end
