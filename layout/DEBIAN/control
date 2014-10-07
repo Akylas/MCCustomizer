@@ -1,7 +1,7 @@
 Package: com.akylas.mccustomizer
 Name: Music Controls Customizer
 Depends: libactivator (>= 1.8.3), mobilesubstrate, applist (>= 1.4.1), firmware (>= 7.0), preferenceloader
-Version: 1.2
+Version: 1.3
 Architecture: iphoneos-arm
 Description: Your Ultimate music controls customizer!
 Author: Martin Guillon
