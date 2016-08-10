@@ -1,12 +1,71 @@
 
-#import "_MPUSystemMediaControlsView.h"
+#import "MPUSystemMediaControlsView.h"
 #import "MCCTweakController.h"
 #import <objc/runtime.h>
 #import <MediaPlayer/MPVolumeView.h>
 #import "Utils.h"
+#import "ColorArt/SLColorArt.h"
+
+typedef void (^ LockedActionBlock)(void);
+
+@interface UIView (FindUIViewController)
+- (UIViewController *) firstAvailableUIViewController;
+- (id) traverseResponderChainForUIViewController;
+@end
+
+@implementation UIView (FindUIViewController)
+- (UIViewController *) firstAvailableUIViewController {
+    // convenience function for casting and to "mask" the recursive function
+    return (UIViewController *)[self traverseResponderChainForUIViewController];
+}
+
+- (id) traverseResponderChainForUIViewController {
+    id nextResponder = [self nextResponder];
+    if ([nextResponder isKindOfClass:[UIViewController class]]) {
+        return nextResponder;
+    } else if ([nextResponder isKindOfClass:[UIView class]]) {
+        return [nextResponder traverseResponderChainForUIViewController];
+    } else {
+        return nil;
+    }
+}
+@end
 
 @interface MPVolumeView()
-@property(nonatomic) BOOL showsVolumeSlider;
+// @property(nonatomic) BOOL showsVolumeSlider;
+@end
+
+
+@interface UIAlertAction()
+- (void)setImage:(id)arg1;
+- (id)image;
+
+- (UIAlertController*)_alertController;
+
+@end
+
+@interface SBDeviceLockController : NSObject
++ (SBDeviceLockController *)sharedController;
+- (BOOL)isPasscodeLocked;
+@end
+
+@interface SBUnlockActionContext : NSObject
+- (id)initWithLockLabel:(NSString *)lockLabel shortLockLabel:(NSString *)label unlockAction:(void (^)())action identifier:(NSString *)id;
+- (void)setDeactivateAwayController:(BOOL)deactivate;
+@end
+
+@interface SBAlert : UIViewController
+@end
+
+@interface SBLockScreenViewControllerBase: SBAlert 
+- (void)setUnlockActionContext:(SBUnlockActionContext *)context;
+- (void)setPasscodeLockVisible:(BOOL)visibile animated:(BOOL)animated completion:(void (^)())completion;
+@end
+
+@interface SBLockScreenManager : NSObject
++ (SBLockScreenManager *)sharedInstance;
+- (BOOL)isUILocked;
+- (SBLockScreenViewControllerBase *)lockScreenViewController;
 @end
 
 // static char const * const IsCCSectionKey = "IsCCSection";
@@ -67,7 +126,12 @@ static CGRect originalTransportControlsViewFrame;
 static CGRect originalTimeInformationViewFrame;
 static CGRect originalVolumeViewFrame;
 
-@interface _MPUSystemMediaControlsView()
+static NSDictionary * sDefaultTitleTextAttributes = nil;
+static NSDictionary * sDefaultDetailTextAttributes = nil;
+
+static UIColor * sDefaultTintColor = nil;
+
+@interface MPUSystemMediaControlsView()
 -(BOOL)gesturesEnabled ;
 -(BOOL)gesturesInversed ;
 -(void)afterLayoutSubviews;
@@ -75,7 +139,7 @@ static CGRect originalVolumeViewFrame;
 -(BOOL)shouldLayout;
 @end
 
-@implementation _MPUSystemMediaControlsView (Additions)
+@implementation MPUSystemMediaControlsView (Additions)
 @dynamic isCCSection;
 @dynamic firstLayout;
 
@@ -110,12 +174,24 @@ static CGRect originalVolumeViewFrame;
 }
 @end
 
-%hook _MPUSystemMediaControlsView
+// %hook MPUNowPlayingTitlesView
+
+// -(void)setTitleTextAttributes:(NSDictionary *)arg1  {
+//     Log(@"MPUNowPlayingTitlesView setTitleTextAttributes %@", arg1);
+//     %orig; 
+// }
+// -(void)setDetailTextAttributes:(NSDictionary *)arg1  {
+//     Log(@"MPUNowPlayingTitlesView setDetailTextAttributes %@", arg1);
+//     %orig; 
+// }
+// %end
+
+%hook MPUSystemMediaControlsView
 
 %new 
 -(BOOL)shouldLayout{
     BOOL isCCControl = [self isCCSection];
-    return SHOULD_HOOK() && isCCControl?BOOL_PROP(ccCustomLayout):BOOL_PROP(lsCustomLayout);
+    return SHOULD_HOOK() && (isCCControl?BOOL_PROP(ccCustomLayout):BOOL_PROP(lsCustomLayout));
 }
 
 %new
@@ -136,6 +212,7 @@ static CGRect originalVolumeViewFrame;
             [airPlayButton setHidden:YES];
             [menuButton setHidden:YES];
             self.firstLayout = YES;
+            self.tintColor = DEFAULT_TINT_COLOR;
         }
         return;
     }
@@ -156,7 +233,7 @@ static CGRect originalVolumeViewFrame;
 
     if (trackInformationView.artistText == nil || trackInformationView.artistText == [NSNull null]) {
         BOOL oneTapToOpen = (isCCControl && BOOL_PROP(ccOneTapToOpenNoMusic)) || (!isCCControl && BOOL_PROP(lsOneTapToOpenNoMusic));
-        SBApplication* app = [[%c(SBApplicationController) sharedInstance] applicationWithDisplayIdentifier:STRING_PROP(DefaultApp)];  
+        SBApplication* app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:STRING_PROP(DefaultApp)];  
         [trackInformationView setArtistText:[NSString stringWithFormat:oneTapToOpen?@"Tap to open %@":@"Long press to open %@", [app displayName]]];
     }
 
@@ -219,9 +296,9 @@ static CGRect originalVolumeViewFrame;
 
     if (!hideAirPlay || !hideMenuButton) {
         [airPlayButton sizeToFit];
-        CGRect menuButtonFrame = menuButton.frame;
-        menuButtonFrame.origin.x = 2;
         CGRect airplayFrame = airPlayButton.frame;
+        CGRect menuButtonFrame = airplayFrame;
+        menuButtonFrame.origin.x = 2;
         CGFloat aWidth = airplayFrame.size.width + 2; //for a little right padding
         CGFloat aHeight = airplayFrame.size.height;
         CGRect myFrame = self.bounds;
@@ -282,13 +359,18 @@ static CGRect originalVolumeViewFrame;
     [self afterLayoutSubviews];
 }
 
+-(void)setTintColor:(UIColor*)color {
+    Log(@"MPUSystemMediaControlsView setTintColor");
+    %orig;
+}
+
 - (void)_layoutSubviewsControlCenteriPad {
     %orig;
     [self afterLayoutSubviews];
 }
 
 -(id)initWithStyle:(int)arg1 {
-    UIView* view = %orig;
+    MPUSystemMediaControlsView* view = %orig;
     UISwipeGestureRecognizer *swipeReco = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeLeftGesture:)];
     [swipeReco setDirection:(UISwipeGestureRecognizerDirectionLeft)];
     [view addGestureRecognizer:swipeReco];
@@ -298,24 +380,57 @@ static CGRect originalVolumeViewFrame;
     [view addGestureRecognizer:swipeReco];
 
     UILongPressGestureRecognizer *longPressReco = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPressGesture:)];
-    longPressReco.delegate = (id<UILongPressGestureRecognizerDelegate>)self;
+    // longPressReco.delegate = (id<UILongPressGestureRecognizerDelegate>)self;
     [view addGestureRecognizer:longPressReco];
 
-    MPVolumeView *volumeView = [[MPVolumeView alloc] init];
+    __block MPVolumeView *volumeView = [[MPVolumeView alloc] init];
     [volumeView setShowsVolumeSlider:NO];
     [volumeView setHidden:![self shouldLayout]];
     [volumeView sizeToFit];
     [view addSubview:volumeView];
     [self setAirplayButton:volumeView];
 
-    UIButton *menuButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    __block UIButton *menuButton = [UIButton buttonWithType:UIButtonTypeCustom];
     menuButton.userInteractionEnabled = YES;
     [menuButton setFrame:CGRectMake(0.0,0.0, 29.0, 29.0)];
-    menuButton.showsTouchWhenHighlighted = YES;
-    [menuButton setImage:getBundleImage(@"menu") forState:UIControlStateNormal];
+    [menuButton setImage:[getBundleImage(@"menu") imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate] forState:UIControlStateNormal];
     [menuButton addTarget:self action:@selector(menuButtonAction) forControlEvents:UIControlEventTouchUpInside];
     [view addSubview:menuButton];
     [self setMenuButton:menuButton];
+
+    __block MPUNowPlayingTitlesView* trackInformationView = ((MPUNowPlayingTitlesView*)self.trackInformationView);
+
+    sDefaultTitleTextAttributes = trackInformationView.titleTextAttributes;
+    sDefaultDetailTextAttributes = trackInformationView.detailTextAttributes;
+    // Log(@"test sDefaultTitleTextAttributes: %@", sDefaultTitleTextAttributes);
+    // Log(@"test sDefaultDetailTextAttributes: %@", sDefaultDetailTextAttributes);
+
+    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+    [center addObserverForName:kMRMCCColorArtDidChangeNotification
+        object:nil
+        queue:[NSOperationQueue mainQueue]
+        usingBlock:^(NSNotification *notification) {
+            SLColorArt *colorArt = (SLColorArt*)[notification.userInfo objectForKey:@"colorArt"];
+            if (colorArt) {
+                view.tintColor =  colorArt.primaryColor;
+                trackInformationView.titleTextAttributes = @{NSForegroundColorAttributeName:colorArt.primaryColor};
+                trackInformationView.detailTextAttributes = @{NSForegroundColorAttributeName:colorArt.detailColor};
+            }
+            else {
+                trackInformationView.titleTextAttributes = sDefaultTitleTextAttributes;
+                trackInformationView.detailTextAttributes = sDefaultDetailTextAttributes;
+                view.tintColor = DEFAULT_TINT_COLOR;
+            }
+        }];
+    [center addObserverForName:kMRMCCSettingsDidChangeNotification
+        object:nil
+        queue:[NSOperationQueue mainQueue]
+        usingBlock:^(NSNotification *notification) {
+            Log(@"kMRMCCSettingsDidChangeNotification");
+            [self afterLayoutSubviews];
+        }];
+
+
     return view;
 }
 
@@ -323,33 +438,64 @@ static CGRect originalVolumeViewFrame;
 -(void)menuButtonAction
 {
     if (!SHOULD_HOOK()) return;
-    BOOL isCCControl = [self isCCSection];
+    __block BOOL isCCControl = [self isCCSection];
+    __block NSOrderedSet * actions = [NSOrderedSet orderedSetWithArray:[MCCTweakController getProp:isCCControl?@"ccEnabledSections":@"lsEnabledSections"]];
 
-    NSOrderedSet * actions = [NSOrderedSet orderedSetWithArray:[MCCTweakController getProp:isCCControl?@"ccEnabledSections":@"lsEnabledSections"]];
-    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:((id<UIActionSheetDelegate>)self) cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil];
-    for( NSString *ID in actions)  {
-        LAEvent *event = [[LAEvent alloc] initWithName:ID];
-        NSString* listenerName = [LASharedActivator assignedListenerNameForEvent:event];
-        NSArray* listeners = [listenerName componentsSeparatedByString:@";"];
-        if ([listeners count] > 0) {
-            [actionSheet addButtonWithTitle:getActivatorDisplayName(listeners)]; 
-            [[[actionSheet valueForKey:@"_buttons"] lastObject] setImage:getActivatorEventImage(listeners) forState:UIControlStateNormal];
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
+        __block UIAlertController* alertController = [UIAlertController alertControllerWithTitle:nil
+          message:nil
+          preferredStyle:UIAlertControllerStyleActionSheet];
+        for( NSString *ID in actions)  {
+            LAEvent *event = [[LAEvent alloc] initWithName:ID];
+            NSString* listenerName = [LASharedActivator assignedListenerNameForEvent:event];
+            NSArray* listeners = [listenerName componentsSeparatedByString:@";"];
+            if ([listeners count] > 0) {
+                UIAlertAction* theAction = [UIAlertAction actionWithTitle:getActivatorDisplayName(listeners)
+                    style:UIAlertActionStyleDefault
+                    handler:^(UIAlertAction * action){
+                      NSUInteger indexOfAction = [[[action _alertController] actions] indexOfObject:action];
+                      NSString* ID = [actions objectAtIndex:indexOfAction];
+                      LAEvent *event = [[LAEvent alloc] initWithName:ID];
+                      [LASharedActivator sendEventToListener:event];
+                      [alertController dismissViewControllerAnimated:YES completion:nil];
+                  }];
+                [theAction setImage:getActivatorEventImage(listeners)];
+                [alertController addAction:theAction];
+            }
         }
+        [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel"
+            style:UIAlertActionStyleCancel
+            handler:^(UIAlertAction * action){
+              [alertController dismissViewControllerAnimated:YES completion:nil];
+          }]];
+        [[self firstAvailableUIViewController] presentViewController:alertController animated:YES completion:nil];
     }
-    actionSheet.cancelButtonIndex = [actionSheet addButtonWithTitle:@"Cancel"];
-    [actionSheet showInView:self];
+    else {
+        // UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:((id<UIActionSheetDelegate>)self) cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil];
+        // for( NSString *ID in actions)  {
+        //     LAEvent *event = [[LAEvent alloc] initWithName:ID];
+        //     NSString* listenerName = [LASharedActivator assignedListenerNameForEvent:event];
+        //     NSArray* listeners = [listenerName componentsSeparatedByString:@";"];
+        //     if ([listeners count] > 0) {
+        //         [actionSheet addButtonWithTitle:getActivatorDisplayName(listeners)]; 
+        //         [[[actionSheet valueForKey:@"_buttons"] lastObject] setImage:getActivatorEventImage(listeners) forState:UIControlStateNormal];
+        //     }
+        // }
+        // actionSheet.cancelButtonIndex = [actionSheet addButtonWithTitle:@"Cancel"];
+        // [actionSheet showInView:self];
+    }
 }
 
 %new
-- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    if (buttonIndex == actionSheet.cancelButtonIndex) return;
-    BOOL isCCControl = [self isCCSection];
-    NSOrderedSet * actions = [NSOrderedSet orderedSetWithArray:[MCCTweakController getProp:isCCControl?@"ccEnabledSections":@"lsEnabledSections"]];
-    NSString* ID = [actions objectAtIndex:buttonIndex];
-    LAEvent *event = [[LAEvent alloc] initWithName:ID];
-    [LASharedActivator sendEventToListener:event];
-}
+// - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+// {
+//     if (buttonIndex == actionSheet.cancelButtonIndex) return;
+//     BOOL isCCControl = [self isCCSection];
+//     NSOrderedSet * actions = [NSOrderedSet orderedSetWithArray:[MCCTweakController getProp:isCCControl?@"ccEnabledSections":@"lsEnabledSections"]];
+//     NSString* ID = [actions objectAtIndex:buttonIndex];
+//     LAEvent *event = [[LAEvent alloc] initWithName:ID];
+//     [LASharedActivator sendEventToListener:event];
+// }
 
 
 %new
@@ -388,6 +534,30 @@ static CGRect originalVolumeViewFrame;
    // [[%c(SBMediaController) sharedInstance] changeTrack:[self gesturesInversed]?1:-1];
 }
 
+static void runBlockWithLocked(LockedActionBlock block)
+{
+    if ([[objc_getClass("SBDeviceLockController") sharedController] isPasscodeLocked]) {
+        SBLockScreenManager *manager = (SBLockScreenManager *)[objc_getClass("SBLockScreenManager") sharedInstance];
+        if ([manager isUILocked])
+        {
+            if ([objc_getClass("SBControlCenterController") sharedInstance]) [(SBControlCenterController *)[objc_getClass("SBControlCenterController") sharedInstance] dismissAnimated:YES];
+
+            void (^action)() = ^() {
+                Log(@"runBlockWithLocked test");
+                block();
+            };
+            SBLockScreenViewControllerBase *controller = [(SBLockScreenManager *)[objc_getClass("SBLockScreenManager") sharedInstance] lockScreenViewController];
+
+            SBUnlockActionContext *context = [[objc_getClass("SBUnlockActionContext") alloc] initWithLockLabel:nil shortLockLabel:nil unlockAction:action identifier:nil];
+            [context setDeactivateAwayController:YES];
+            [controller setUnlockActionContext:context];
+            [controller setPasscodeLockVisible:YES animated:YES completion:nil];
+            return;
+        }
+    }
+    block();
+}
+
 %new
 -(void)handleLongPressGesture:(UILongPressGestureRecognizer*)sender
 {
@@ -396,12 +566,16 @@ static CGRect originalVolumeViewFrame;
     } else if (sender.state == UIGestureRecognizerStateBegan) {
         SBApplication* app = [[%c(SBMediaController) sharedInstance] nowPlayingApplication];
         NSString* defaultApp = STRING_PROP(DefaultApp);
-        if (BOOL_PROP(alwaysUseDefaultApp) || !app) {
-            [[%c(SBUIController) sharedInstance] activateApplicationAnimated:[[%c(SBApplicationController) sharedInstance] applicationWithDisplayIdentifier:defaultApp]];
-        }
-        else {
-            [[%c(SBUIController) sharedInstance] activateApplicationAnimated:app];
-        }
+        runBlockWithLocked(^() {
+            Log(@"runBlockWithLocked test2");
+            if (BOOL_PROP(alwaysUseDefaultApp) || !app) {
+                [[%c(SBUIController) sharedInstance] activateApplication:[[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:defaultApp]];
+            }
+            else {
+                [[%c(SBUIController) sharedInstance] activateApplication:app];
+            }
+        });
+        
     }
 }
 %end

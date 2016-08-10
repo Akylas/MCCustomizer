@@ -116,8 +116,8 @@
 - (void)updateLockscreenArtwork;
 - (void)blurryArtworkPreferencesChanged;
 -(BOOL)_activateAppSwitcherFromSide:(int)arg1 ;
--(void)activateApplicationAnimatedFromIcon:(id)arg1 fromLocation:(int)arg2 ;
--(void)activateApplicationAnimated:(id)arg1 ;
+-(void)activateApplicationFromIcon:(id)arg1 fromLocation:(int)arg2 ;
+-(void)activateApplication:(id)arg1 ;
 
 @end
 
@@ -132,7 +132,7 @@
 @interface SBApplicationController: NSObject
 + (instancetype)sharedInstance;
 
--(id)applicationWithDisplayIdentifier:(id)arg1 ;
+-(id)applicationWithBundleIdentifier:(id)arg1 ;
 @end
 
 @interface _NowPlayingArtView : UIView
@@ -147,7 +147,7 @@
 @end
 
 // @protocol MPUSystemMediaControlsDelegate;
-@class MPUNowPlayingController, MPAudioDeviceController, _MPUSystemMediaControlsView, UIImageView, NSDictionary, UIPopoverController, RUTrackActionsModalItem, NSString, NSTimer, UIView;
+@class MPUNowPlayingController, MPAudioDeviceController, MPUSystemMediaControlsView, UIImageView, NSDictionary, UIPopoverController, RUTrackActionsModalItem, NSString, NSTimer, UIView;
 
 @interface MPUSystemMediaControlsViewController : UIViewController{
 
@@ -155,7 +155,7 @@
     // MPAudioDeviceController* _audioDeviceController;
     // BOOL _wantsToLaunchNowPlayingApp;
     // unsigned _runningLongPressCommand;
-    // _MPUSystemMediaControlsView* _mediaControlsView;
+    // MPUSystemMediaControlsView* _mediaControlsView;
     // UIImageView* _artworkImageView;
     // NSDictionary* _nowPlayingInfoForPresentedTrackActions;
     // UIPopoverController* _trackActionsPopoverController;
@@ -209,13 +209,13 @@
 -(void)setPersistentUpdatesEnabled:(BOOL)arg1 ;
 -(BOOL)persistentUpdatesEnabled;
 -(void)trackActioningObject:(id)arg1 didSelectAction:(int)arg2 atIndex:(int)arg3 ;
--(_MPUSystemMediaControlsView*)mediaControlsView;
+-(MPUSystemMediaControlsView*)mediaControlsView;
 -(UIView*)volumeView;
 @end
 
 @class MPUTransportControlsView, MPUChronologicalProgressView, MPUMediaControlsVolumeView;
 
-@interface _MPUSystemMediaControlsView : UIView {
+@interface MPUSystemMediaControlsView : UIView {
 
     // int _style;
     // MPUTransportControlsView* _transportControlsView;
@@ -312,9 +312,6 @@
 - (double)trackDuration;
 - (int)shuffleMode;
 - (int)repeatMode;
-- (id)nowPlayingAlbum;
-- (id)nowPlayingTitle;
-- (id)nowPlayingArtist;
 - (unsigned long long)trackUniqueIdentifier;
 - (BOOL)isTVOut;
 - (BOOL)isMovie;
@@ -359,6 +356,7 @@
 
 @interface SBControlCenterController : UIViewController
 
++(id)_sharedInstanceCreatingIfNeeded:(BOOL)arg1 ;
 + (id)sharedInstanceIfExists;
 + (id)sharedInstance;
 - (SBControlCenterViewController*)viewController;
@@ -379,5 +377,14 @@
 @interface UIWindow ()
 
 -(void)_updateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation animated:(BOOL)animated;
+
+@end
+
+@interface MPUNowPlayingController : NSObject {
+    NSDictionary* _currentNowPlayingInfo;
+}
+-(NSDictionary *)currentNowPlayingInfo;
+-(UIImage *)currentNowPlayingArtwork;
+-(NSString *)nowPlayingAppDisplayID;
 
 @end

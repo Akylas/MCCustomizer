@@ -1,6 +1,33 @@
 #import "MCCTweakController.h"
 #import "PrivateHeaders.h"
-#import "_MPUSystemMediaControlsView.h"
+#import "MPUSystemMediaControlsView.h"
+#import "ColorArt/SLColorArt.h"
+
+
+%hook SBControlCenterContentView
+
+-(id)initWithFrame:(CGRect)arg1 {
+    SBControlCenterContentView* view = %orig;
+    view.tintColor = DEFAULT_TINT_COLOR;
+    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+    [center addObserverForName:kMRMCCColorArtDidChangeNotification
+        object:nil
+        queue:[NSOperationQueue mainQueue]
+        usingBlock:^(NSNotification *notification) {
+            SLColorArt *colorArt = (SLColorArt*)[notification.userInfo objectForKey:@"colorArt"];
+            Log(@"SBControlCenterContentView colorArt");
+
+            if (colorArt) {
+                view.tintColor =  colorArt.primaryColor;
+            }
+            else {
+                view.tintColor = DEFAULT_TINT_COLOR;
+            }
+        }];
+
+    return view;
+}
+%end
 
 %hook SBControlCenterController
 %new
@@ -22,11 +49,11 @@
     }
 }
 
-+(void)notifyControlCenterControl:(id)control didActivate:(BOOL)activate 
-{
-    Log(@"notifyControlCenterControl %@", control);
-    %orig;
-}
+// +(void)notifyControlCenterControl:(id)control didActivate:(BOOL)activate 
+// {
+//     Log(@"notifyControlCenterControl %@", control);
+//     %orig;
+// }
 
 %end
 

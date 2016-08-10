@@ -1,7 +1,7 @@
-#import "_MPUSystemMediaControlsView.h"
+#import "MPUSystemMediaControlsView.h"
 #import "MCCTweakController.h"
 
-@interface _MPUSystemMediaControlsView(gestures)
+@interface MPUSystemMediaControlsView(gestures)
 -(BOOL)gesturesEnabled;
 -(UIView*)artworkView;
 @end
@@ -9,9 +9,9 @@
 %hook MPUSystemMediaControlsViewController
 
 %new
--(_MPUSystemMediaControlsView*)mediaControlsView
+-(MPUSystemMediaControlsView*)mediaControlsView
 {
-    return MSHookIvar<_MPUSystemMediaControlsView*>(self, "_mediaControlsView");
+    return MSHookIvar<MPUSystemMediaControlsView*>(self, "_mediaControlsView");
 }
 
 -(void)mediaControlsTitlesViewWasTapped:(id)arg1 
@@ -32,7 +32,7 @@
     else {
         if ((isCCControl && BOOL_PROP(ccOneTapToOpenNoMusic) ) || (!isCCControl && BOOL_PROP(lsOneTapToOpenNoMusic))) {
             NSString* defaultApp = STRING_PROP(DefaultApp);
-            [[%c(SBUIController) sharedInstance] activateApplicationAnimated:[[%c(SBApplicationController) sharedInstance] applicationWithDisplayIdentifier:defaultApp]];
+            [[%c(SBUIController) sharedInstance] activateApplication:[[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:defaultApp]];
         }
     }
 }

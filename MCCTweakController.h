@@ -9,6 +9,13 @@
 
 #define CLASS_STRING(object) NSStringFromClass([object class])
 
+#define SYSTEM_VERSION_EQUAL_TO(v)                  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedSame)
+#define SYSTEM_VERSION_GREATER_THAN(v)              ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedDescending)
+#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
+#define SYSTEM_VERSION_LESS_THAN(v)                 ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
+#define SYSTEM_VERSION_LESS_THAN_OR_EQUAL_TO(v)     ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedDescending)
+
+#define DEFAULT_TINT_COLOR [UIColor whiteColor]
 
 #define kMCCId @"com.akylas.mccustomizer"
 
@@ -24,12 +31,18 @@
 #define kMCCActionOpenPlayer @"com.akylas.mccustomizer.openplayer"
 #define kMCCEventSleepTimer @"com.akylas.mccustomizer.sleeptimer"
 
+#define kMRMCCColorArtDidChangeNotification @"kMRMCCColorArtDidChangeNotification"
+#define kMRMCCSettingsDidChangeNotification @"kMRMCCSettingsDidChangeNotification"
+
+
 @class SBLockScreenView;
-@interface MCCTweakController : NSObject {
+@class MPUNowPlayingController;
+@interface MCCTweakController : NSObject<UIPopoverPresentationControllerDelegate> {
 
 }
 @property (nonatomic, retain) NSDictionary* settings;
 
+@property(nonatomic,retain) MPUNowPlayingController* npController;
 @property(nonatomic,retain) UIImage* nowPlayingImage;
 @property(nonatomic,readonly) UIImageView* ccArtworkView;
 @property(nonatomic,readonly) UIImageView* lsArtworkView;
@@ -45,7 +58,10 @@
 
 - (void)dataProviderDidLoad;
 -(void)currentSongChanged;
+-(void)playingInfoChanged;
+-(void)updateNowPlaying:(NSDictionary*)dict withController:(MPUNowPlayingController*)controller;
 +(id)getProp:(NSString*)key;
+-(UIColor*) controlCenterControlColorForState:(int) state;
 
 #define BOOL_PROP(val) [[MCCTweakController getProp:[NSString stringWithUTF8String:#val]] boolValue]
 #define STRING_PROP(val) [MCCTweakController getProp:[NSString stringWithUTF8String:#val]]

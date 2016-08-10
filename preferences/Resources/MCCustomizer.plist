@@ -24,6 +24,14 @@
         <key>PostNotification</key>        <string>com.akylas.mccustomizer.preferences-changed</string>
             </dict>
             <dict>
+        <key>cell</key>                    <string>PSSwitchCell</string>
+        <key>default</key>                 <true/>
+        <key>defaults</key>                <string>com.akylas.mccustomizer</string>
+        <key>label</key>                   <string>ColorArt Enabled</string>
+        <key>key</key>                     <string>ColorArtEnabled</string>
+        <key>PostNotification</key>        <string>com.akylas.mccustomizer.preferences-changed</string>
+            </dict>
+            <dict>
         <key>cell</key>                    <string>PSLinkCell</string>
         <key>bundle</key>                  <string>AppList</string>
         <key>isController</key>            <string>1</string>

@@ -1,6 +1,6 @@
 #import "MCCTweakController.h"
 #import "PrivateHeaders.h"
-#import "_MPUSystemMediaControlsView.h"
+#import "MPUSystemMediaControlsView.h"
 
 %hook SBLockScreenPlugin
 
